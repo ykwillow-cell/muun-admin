@@ -22,6 +22,7 @@ import {
   Redo2,
 } from "lucide-react";
 import { TypographyControls } from "./TypographyControls";
+import { ColorPicker } from "./ColorPicker";
 import "./RichTextEditor.css";
 
 const lowlight = createLowlight(common);
@@ -247,9 +248,18 @@ export function RichTextEditor({
         </Button>
       </div>
 
-      {/* 타이포그래피 제어 툴바 */}
-      <div className="typography-toolbar flex items-center gap-3 p-3 border-b bg-gray-50">
+      {/* 타이포그래피 및 색상 제어 툴바 */}
+      <div className="typography-toolbar flex items-center gap-4 p-3 border-b bg-gray-50">
         <TypographyControls editor={editor} />
+        <div className="w-px h-6 bg-gray-300" />
+        <ColorPicker
+          onColorSelect={(color) => {
+            editor.chain().focus().setMark("textStyle", { color }).run();
+          }}
+          onColorClear={() => {
+            editor.chain().focus().clearNodes().run();
+          }}
+        />
       </div>
 
       {/* 에디터 */}
