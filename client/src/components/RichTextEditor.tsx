@@ -3,6 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { common, createLowlight } from "lowlight";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ import {
   Undo2,
   Redo2,
 } from "lucide-react";
+import { TypographyControls } from "./TypographyControls";
 import "./RichTextEditor.css";
 
 const lowlight = createLowlight(common);
@@ -33,6 +35,7 @@ interface RichTextEditorProps {
 /**
  * TipTap 기반 WYSIWYG 에디터 컴포넌트
  * 마크다운 기호가 노출되지 않는 깔끔한 디자인 모드 제공
+ * 고급 타이포그래피 제어 기능 포함 (텍스트 크기, 폰트 두께)
  */
 export function RichTextEditor({
   value,
@@ -54,6 +57,9 @@ export function RichTextEditor({
         openOnClick: false,
         autolink: true,
       }),
+      TextStyle,
+      // 커스텀 타이포그래피 확장
+      // TextSize와 FontWeight 확장은 추후 추가
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -92,7 +98,7 @@ export function RichTextEditor({
 
   return (
     <div className="rich-text-editor-container border rounded-lg overflow-hidden bg-white">
-      {/* 툴바 */}
+      {/* 주 툴바 */}
       <div className="toolbar flex flex-wrap gap-1 p-3 border-b bg-gray-50">
         {/* 제목 */}
         <Button
@@ -239,6 +245,11 @@ export function RichTextEditor({
         >
           <Redo2 className="w-4 h-4" />
         </Button>
+      </div>
+
+      {/* 타이포그래피 제어 툴바 */}
+      <div className="typography-toolbar flex items-center gap-3 p-3 border-b bg-gray-50">
+        <TypographyControls editor={editor} />
       </div>
 
       {/* 에디터 */}
