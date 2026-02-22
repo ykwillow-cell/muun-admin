@@ -1,10 +1,40 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
+import {
+  getColumns,
+  getColumnsCount,
+  getColumnById,
+  getColumnBySlug,
+  createColumn,
+  updateColumn,
+  deleteColumn,
+  getCategories,
+  createCategory,
+} from "./db";
+import { TRPCError } from "@trpc/server";
+
+// 칼럼 유효성 검사 스키마
+const columnSchema = z.object({
+  slug: z
+    .string()
+    .min(1, "슬러그는 필수입니다")
+    .regex(/^[a-z0-9-]+$/, "슬러그는 소문자, 숫자, 하이픈만 포함할 수 있습니다"),
+  title: z.string().min(1, "제목은 필수입니다").max(255),
+  category: z.string().min(1, "카테고리는 필수입니다"),
+  author: z.string().default("무운 역술팀"),
+  content: z.string().min(1, "내용은 필수입니다"),
+  metaTitle: z.string().min(1, "메타 제목은 필수입니다").max(60),
+  metaDescription: z.string().min(1, "메타 설명은 필수입니다").max(160),
+  canonicalUrl: z.string().url().optional().or(z.literal("")),
+  thumbnailUrl: z.string().url().optional().or(z.literal("")),
+  readingTime: z.number().int().positive().optional(),
+  published: z.boolean().default(false),
+});
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -17,12 +47,262 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  // ==================== 칼럼 관련 프로시저 ====================
+  columns: router({
+    /**
+     * 칼럼 목록 조회 (필터링, 페이지네이션)
+     */
+    list: protectedProcedure
+      .input(
+        z.object({
+          category: z.string().optional(),
+          search: z.string().optional(),
+          published: z.boolean().optional(),
+          page: z.number().default(1),
+          limit: z.number().default(20),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        // 관리자 권한 확인
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        const items = await getColumns({
+          category: input.category,
+          search: input.search,
+          published: input.published,
+          page: input.page,
+          limit: input.limit,
+        });
+
+        const total = await getColumnsCount({
+          category: input.category,
+          search: input.search,
+          published: input.published,
+        });
+
+        return {
+          items,
+          total,
+          page: input.page,
+          limit: input.limit,
+          totalPages: Math.ceil(total / input.limit),
+        };
+      }),
+
+    /**
+     * 칼럼 상세 조회
+     */
+    get: protectedProcedure
+      .input(z.number())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        const column = await getColumnById(input);
+        if (!column) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "칼럼을 찾을 수 없습니다.",
+          });
+        }
+
+        return column;
+      }),
+
+    /**
+     * 칼럼 생성
+     */
+    create: protectedProcedure
+      .input(columnSchema)
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        // 슬러그 중복 확인
+        const existing = await getColumnBySlug(input.slug);
+        if (existing) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "이미 존재하는 슬러그입니다.",
+          });
+        }
+
+        const column = await createColumn({
+          slug: input.slug,
+          title: input.title,
+          category: input.category,
+          author: input.author,
+          content: input.content,
+          metaTitle: input.metaTitle,
+          metaDescription: input.metaDescription,
+          canonicalUrl: input.canonicalUrl || null,
+          thumbnailUrl: input.thumbnailUrl || null,
+          readingTime: input.readingTime || null,
+          published: input.published,
+        });
+
+        if (!column) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "칼럼 생성에 실패했습니다.",
+          });
+        }
+
+        // TODO: SSG 빌드 트리거
+        // await triggerSSGBuild(column.id);
+
+        return column;
+      }),
+
+    /**
+     * 칼럼 수정
+     */
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          data: columnSchema.partial(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        const existing = await getColumnById(input.id);
+        if (!existing) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "칼럼을 찾을 수 없습니다.",
+          });
+        }
+
+        // 슬러그 변경 시 중복 확인
+        if (input.data.slug && input.data.slug !== existing.slug) {
+          const slugExists = await getColumnBySlug(input.data.slug);
+          if (slugExists) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "이미 존재하는 슬러그입니다.",
+            });
+          }
+        }
+
+        const column = await updateColumn(input.id, input.data);
+
+        if (!column) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "칼럼 수정에 실패했습니다.",
+          });
+        }
+
+        // TODO: SSG 빌드 트리거
+        // await triggerSSGBuild(column.id);
+
+        return column;
+      }),
+
+    /**
+     * 칼럼 삭제
+     */
+    delete: protectedProcedure
+      .input(z.number())
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        const existing = await getColumnById(input);
+        if (!existing) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "칼럼을 찾을 수 없습니다.",
+          });
+        }
+
+        const success = await deleteColumn(input);
+
+        if (!success) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "칼럼 삭제에 실패했습니다.",
+          });
+        }
+
+        // TODO: SSG 빌드 트리거
+        // await triggerSSGBuild(input);
+
+        return { success: true };
+      }),
+  }),
+
+  // ==================== 카테고리 관련 프로시저 ====================
+  categories: router({
+    /**
+     * 모든 카테고리 조회
+     */
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "관리자만 접근할 수 있습니다.",
+        });
+      }
+
+      return await getCategories();
+    }),
+
+    /**
+     * 카테고리 생성
+     */
+    create: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().min(1),
+          slug: z.string().min(1),
+          description: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "관리자만 접근할 수 있습니다.",
+          });
+        }
+
+        const category = await createCategory(input);
+
+        if (!category) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "카테고리 생성에 실패했습니다.",
+          });
+        }
+
+        return category;
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
