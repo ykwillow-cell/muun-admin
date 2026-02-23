@@ -275,6 +275,7 @@ class SDKServer {
               openId: `admin-${admin.id}`,
               name: admin.name || admin.email,
               email: admin.email,
+              role: "admin",
               loginMethod: "email-password",
               lastSignedIn: new Date(),
               createdAt: new Date(),
