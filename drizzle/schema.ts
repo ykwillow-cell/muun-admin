@@ -63,3 +63,21 @@ export const categories = mysqlTable("categories", {
 
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = typeof categories.$inferInsert;
+
+/**
+ * Admin 테이블
+ * 관리자 계정 정보 저장 (이메일/비밀번호 로그인용)
+ */
+export const admins = mysqlTable("admins", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: text("passwordHash").notNull(), // bcrypt로 해싱된 비밀번호
+  name: varchar("name", { length: 100 }).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn"),
+});
+
+export type Admin = typeof admins.$inferSelect;
+export type InsertAdmin = typeof admins.$inferInsert;

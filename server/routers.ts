@@ -13,6 +13,10 @@ import {
   deleteColumn,
   getCategories,
   createCategory,
+  getAdminByEmail,
+  createAdmin,
+  verifyAdminPassword,
+  updateAdminLastSignedIn,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 
@@ -45,6 +49,54 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    /**
+     * 이메일/비밀번호 로그인
+     */
+    login: publicProcedure
+      .input(
+        z.object({
+          email: z.string().email("유효한 이메일을 입력하세요"),
+          password: z.string().min(1, "비밀번호는 필수입니다"),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        // 관리자 인증
+        const admin = await verifyAdminPassword(input.email, input.password);
+        if (!admin) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "이메일 또는 비밀번호가 올바르지 않습니다.",
+          });
+        }
+
+        if (!admin.isActive) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "비활성화된 계정입니다.",
+          });
+        }
+
+        // 마지막 로그인 시간 업데이트
+        await updateAdminLastSignedIn(admin.id);
+
+        // 세션 쿠키 설정
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, JSON.stringify({
+          adminId: admin.id,
+          email: admin.email,
+          name: admin.name,
+          role: "admin",
+        }), cookieOptions);
+
+        return {
+          success: true,
+          admin: {
+            id: admin.id,
+            email: admin.email,
+            name: admin.name,
+          },
+        };
+      }),
   }),
 
   // ==================== 칼럼 관련 프로시저 ====================

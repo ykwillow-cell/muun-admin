@@ -15,6 +15,13 @@
       "when": 1771803424661,
       "tag": "0001_lonely_zaran",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771886675349,
+      "tag": "0002_wealthy_james_howlett",
+      "breakpoints": true
     }
   ]
 }

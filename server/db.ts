@@ -1,7 +1,8 @@
 import { eq, and, like, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, columns, categories, Column, InsertColumn, Category, InsertCategory } from "../drizzle/schema";
+import { InsertUser, users, columns, categories, Column, InsertColumn, Category, InsertCategory, admins, Admin, InsertAdmin } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import bcrypt from "bcrypt";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -288,6 +289,102 @@ export async function createCategory(data: InsertCategory): Promise<Category | n
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("[Database] Failed to create category:", error);
+    throw error;
+  }
+}
+
+// ==================== 관리자 관련 쿼리 ====================
+
+/**
+ * 이메일로 관리자 조회
+ */
+export async function getAdminByEmail(email: string): Promise<Admin | undefined> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get admin: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * 관리자 생성
+ */
+export async function createAdmin(data: {
+  email: string;
+  password: string;
+  name: string;
+}): Promise<Admin | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create admin: database not available");
+    return null;
+  }
+
+  try {
+    // 비밀번호 해싱
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const result = await db.insert(admins).values({
+      email: data.email,
+      passwordHash,
+      name: data.name,
+      isActive: true,
+    });
+
+    // insertId 추출
+    let id: number | undefined;
+    if (result && typeof result === 'object') {
+      id = (result as any).insertId || (result as any)[0]?.insertId;
+    }
+    
+    if (!id) {
+      // insertId가 없으면 이메일로 조회
+      const admin = await getAdminByEmail(data.email);
+      return admin || null;
+    }
+    
+    const admin = await db.select().from(admins).where(eq(admins.id, id)).limit(1);
+    return admin.length > 0 ? admin[0] : null;
+  } catch (error) {
+    console.error("[Database] Failed to create admin:", error);
+    throw error;
+  }
+}
+
+/**
+ * 비밀번호 검증
+ */
+export async function verifyAdminPassword(email: string, password: string): Promise<Admin | null> {
+  const admin = await getAdminByEmail(email);
+  if (!admin) {
+    return null;
+  }
+
+  const isValid = await bcrypt.compare(password, admin.passwordHash);
+  if (!isValid) {
+    return null;
+  }
+
+  return admin;
+}
+
+/**
+ * 관리자 마지막 로그인 시간 업데이트
+ */
+export async function updateAdminLastSignedIn(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update admin: database not available");
+    return;
+  }
+
+  try {
+    await db.update(admins).set({ lastSignedIn: new Date() }).where(eq(admins.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to update admin last signed in:", error);
     throw error;
   }
 }
