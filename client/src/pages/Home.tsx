@@ -1,7 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText, Users, Settings } from "lucide-react";
 import { getLoginUrl } from "@/const";
+import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
 import Login from "./Login";
 
 /**
@@ -11,6 +13,13 @@ import Login from "./Login";
  */
 export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  
+  // 칼럼 통계 조회
+  const { data: columnStats } = trpc.columns.list.useQuery(
+    { limit: 1000 },
+    { enabled: isAuthenticated }
+  );
 
   // 로딩 중
   if (loading) {
@@ -50,41 +59,98 @@ export default function Home() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 대시보드 카드 예시 */}
+        {/* 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">
-              사용자 관리
-            </h2>
-            <p className="text-slate-600 mb-4">
-              시스템 사용자를 관리합니다
-            </p>
-            <Button variant="outline" className="w-full">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">전체 칼럼</p>
+                <p className="text-3xl font-bold text-slate-900 mt-2">
+                  {columnStats?.total || 0}
+                </p>
+              </div>
+              <FileText className="w-12 h-12 text-blue-500 opacity-20" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">발행된 칼럼</p>
+                <p className="text-3xl font-bold text-slate-900 mt-2">
+                  {columnStats?.items?.filter((c: any) => c.published).length || 0}
+                </p>
+              </div>
+              <FileText className="w-12 h-12 text-green-500 opacity-20" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">임시저장</p>
+                <p className="text-3xl font-bold text-slate-900 mt-2">
+                  {columnStats?.items?.filter((c: any) => !c.published).length || 0}
+                </p>
+              </div>
+              <FileText className="w-12 h-12 text-yellow-500 opacity-20" />
+            </div>
+          </div>
+        </div>
+
+        {/* 메뉴 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* 칼럼 관리 */}
+          <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/columns")}>
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                  칼럼 관리
+                </h2>
+                <p className="text-slate-600 mb-4">
+                  칼럼을 작성하고 관리합니다
+                </p>
+              </div>
+              <FileText className="w-6 h-6 text-blue-500" />
+            </div>
+            <Button variant="outline" className="w-full" onClick={(e) => { e.stopPropagation(); setLocation("/columns"); }}>
               관리하기
             </Button>
           </div>
 
+          {/* 사용자 관리 */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">
-              설정
-            </h2>
-            <p className="text-slate-600 mb-4">
-              시스템 설정을 관리합니다
-            </p>
-            <Button variant="outline" className="w-full">
-              설정하기
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                  사용자 관리
+                </h2>
+                <p className="text-slate-600 mb-4">
+                  시스템 사용자를 관리합니다
+                </p>
+              </div>
+              <Users className="w-6 h-6 text-purple-500" />
+            </div>
+            <Button variant="outline" className="w-full" disabled>
+              준비 중
             </Button>
           </div>
 
+          {/* 설정 */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">
-              로그
-            </h2>
-            <p className="text-slate-600 mb-4">
-              시스템 로그를 확인합니다
-            </p>
-            <Button variant="outline" className="w-full">
-              보기
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                  설정
+                </h2>
+                <p className="text-slate-600 mb-4">
+                  시스템 설정을 관리합니다
+                </p>
+              </div>
+              <Settings className="w-6 h-6 text-gray-500" />
+            </div>
+            <Button variant="outline" className="w-full" disabled>
+              준비 중
             </Button>
           </div>
         </div>

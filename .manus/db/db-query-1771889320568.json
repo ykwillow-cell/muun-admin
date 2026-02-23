@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO categories (name, slug, description) VALUES \n('운세', 'fortune', '사주, 타로, 점성술 등 운세 관련 칼럼'),\n('풍수', 'feng-shui', '풍수 및 인테리어 관련 칼럼'),\n('별자리', 'zodiac', '별자리 및 천문학 관련 칼럼'),\n('명리학', 'saju', '사주 명리학 관련 칼럼');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3mX2VkKmqEb7oSG.root --database H3HAY8c2DUgw4Ljsnsaws9 --execute INSERT INTO categories (name, slug, description) VALUES \n('운세', 'fortune', '사주, 타로, 점성술 등 운세 관련 칼럼'),\n('풍수', 'feng-shui', '풍수 및 인테리어 관련 칼럼'),\n('별자리', 'zodiac', '별자리 및 천문학 관련 칼럼'),\n('명리학', 'saju', '사주 명리학 관련 칼럼');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 421
+}

@@ -67,7 +67,7 @@ export default function ColumnList() {
           <p className="text-gray-600 mt-1">작성된 모든 칼럼을 보고 관리하세요.</p>
         </div>
         <Button
-          onClick={() => setLocation("/admin/columns/new")}
+          onClick={() => setLocation("/columns/new")}
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -97,9 +97,9 @@ export default function ColumnList() {
 
             {/* 카테고리 필터 */}
             <Select
-              value={category}
+              value={category || "__all__"}
               onValueChange={(value) => {
-                setCategory(value);
+                setCategory(value === "__all__" ? "" : value);
                 setPage(1);
               }}
             >
@@ -107,7 +107,7 @@ export default function ColumnList() {
                 <SelectValue placeholder="카테고리 선택" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">전체</SelectItem>
+                <SelectItem value="__all__">전체</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.slug}>
                     {cat.name}
@@ -118,9 +118,9 @@ export default function ColumnList() {
 
             {/* 발행 상태 필터 */}
             <Select
-              value={published === undefined ? "all" : published ? "published" : "draft"}
+              value={published === undefined ? "__all__" : published ? "published" : "draft"}
               onValueChange={(value) => {
-                if (value === "all") {
+                if (value === "__all__") {
                   setPublished(undefined);
                 } else {
                   setPublished(value === "published");
@@ -132,7 +132,7 @@ export default function ColumnList() {
                 <SelectValue placeholder="상태 선택" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
+                <SelectItem value="__all__">전체</SelectItem>
                 <SelectItem value="published">발행됨</SelectItem>
                 <SelectItem value="draft">임시저장</SelectItem>
               </SelectContent>
@@ -193,7 +193,7 @@ export default function ColumnList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setLocation(`/admin/columns/${column.id}/edit`)}
+                            onClick={() => setLocation(`/columns/${column.id}/edit`)}
                             title="편집"
                           >
                             <Edit2 className="w-4 h-4" />
