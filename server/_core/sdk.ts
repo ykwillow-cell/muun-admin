@@ -260,6 +260,34 @@ class SDKServer {
     // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
+    
+    // 이메일/비밀번호 로그인 세션 확인
+    if (sessionCookie) {
+      try {
+        const sessionData = JSON.parse(sessionCookie);
+        if (sessionData.adminId && sessionData.email) {
+          // 관리자 계정으로 로그인한 경우
+          const admin = await db.getAdminById(sessionData.adminId);
+          if (admin && admin.isActive) {
+            // 관리자를 User 객체로 반환
+            return {
+              id: admin.id,
+              openId: `admin-${admin.id}`,
+              name: admin.name || admin.email,
+              email: admin.email,
+              loginMethod: "email-password",
+              lastSignedIn: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            } as User;
+          }
+        }
+      } catch (e) {
+        // JSON 파싱 실패 또는 관리자 조회 실패 - OAuth 로그인으로 시도
+      }
+    }
+    
+    // OAuth 로그인 시도
     const session = await this.verifySession(sessionCookie);
 
     if (!session) {

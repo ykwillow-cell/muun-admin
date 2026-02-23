@@ -310,6 +310,20 @@ export async function getAdminByEmail(email: string): Promise<Admin | undefined>
 }
 
 /**
+ * ID로 관리자 조회
+ */
+export async function getAdminById(id: number): Promise<Admin | undefined> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get admin: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(admins).where(eq(admins.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
  * 관리자 생성
  */
 export async function createAdmin(data: {
