@@ -102,7 +102,7 @@ export const appRouter = router({
   // ==================== 칼럼 관련 프로시저 ====================
   columns: router({
     /**
-     * 칼럼 목록 조회 (필터링, 페이지네이션)
+     * 칼럼 목록 조회 (검색, 필터링, 페이지네이션)
      */
     list: protectedProcedure
       .input(
@@ -311,28 +311,20 @@ export const appRouter = router({
   // ==================== 카테고리 관련 프로시저 ====================
   categories: router({
     /**
-     * 모든 카테고리 조회
+     * 모든 카테고리 조회 (공개 - 로그인 불필요)
      */
-    list: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user?.role !== "admin") {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "관리자만 접근할 수 있습니다.",
-        });
-      }
-
+    list: publicProcedure.query(async () => {
       return await getCategories();
     }),
 
     /**
-     * 카테고리 생성
+     * 카테고리 생성 (관리자만)
      */
     create: protectedProcedure
       .input(
         z.object({
-          name: z.string().min(1),
-          slug: z.string().min(1),
-          description: z.string().optional(),
+          name: z.string().min(1, "카테고리명은 필수입니다"),
+          slug: z.string().min(1, "슬러그는 필수입니다"),
         })
       )
       .mutation(async ({ input, ctx }) => {
@@ -343,16 +335,7 @@ export const appRouter = router({
           });
         }
 
-        const category = await createCategory(input);
-
-        if (!category) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "카테고리 생성에 실패했습니다.",
-          });
-        }
-
-        return category;
+        return await createCategory(input.name, input.slug);
       }),
   }),
 });
