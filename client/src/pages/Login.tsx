@@ -15,10 +15,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const utils = trpc.useUtils();
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: () => {
-      // 로그인 성공 후 대시보드로 이동
+    onSuccess: async () => {
+      // 로그인 성공 후 auth.me 캐시 무효화
+      await utils.auth.me.invalidate();
+      // 대시보드로 이동
       setLocation("/");
     },
     onError: (error) => {
