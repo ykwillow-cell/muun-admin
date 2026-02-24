@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft } from "lucide-react";
+import {
+  useColumn,
+  useCreateColumn,
+  useUpdateColumn,
+} from "@/lib/queries";
 
 /**
  * 칼럼 작성/편집 페이지
@@ -21,290 +18,129 @@ import { Loader2, ArrowLeft } from "lucide-react";
 export default function ColumnEditor() {
   const params = useParams<{ id?: string }>();
   const [, setLocation] = useLocation();
-  const columnId = params?.id ? parseInt(params.id) : undefined;
+  const columnId = params?.id;
 
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
-  const [author, setAuthor] = useState("");
-  const [published, setPublished] = useState(false);
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
+  const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // 카테고리 목록 조회
-  const { data: categories = [] } = trpc.categories.list.useQuery();
-
   // 기존 칼럼 조회 (편집 모드)
-  const { data: column, isLoading: isLoadingColumn } = trpc.columns.get.useQuery(
-    columnId || 0,
-    { enabled: !!columnId }
-  );
+  const { data: column, isLoading: isLoadingColumn } = useColumn(columnId || "");
 
   // 칼럼 생성
-  const createMutation = trpc.columns.create.useMutation({
-    onSuccess: () => {
-      setLocation("/columns");
-    },
-  });
+  const createMutation = useCreateColumn();
+
+  // 칼럼 업데이트
+  const updateMutation = useUpdateColumn();
 
   // 기존 칼럼 데이터 로드
   useEffect(() => {
     if (column) {
-      setTitle(column.title);
-      setSlug(column.slug);
-      setExcerpt(column.content.substring(0, 200) || "");
-      setContent(column.content);
-      setCategory(column.category || "");
-      setAuthor(column.author || "");
-      setPublished(column.published);
-      setMetaTitle(column.metaTitle || "");
-      setMetaDescription(column.metaDescription || "");
+      setName(column.name);
     }
   }, [column]);
 
-  // 슬러그는 사용자가 단직 입력하도록 지정
-  // 자동 생성은 한글 처리 문제로 비활성화
-
-  // 칼럼 업데이트
-  const updateMutation = trpc.columns.update.useMutation({
-    onSuccess: () => {
-      setLocation("/columns");
-    },
-  });
-
   const handleSave = async () => {
-    if (!title || !content || !category || !slug) {
-      alert("필수 항목을 입력해주세요.");
-      return;
-    }
-
-    // 슬러그 형식 검증
-    if (!/^[a-z0-9-]+$/.test(slug)) {
-      alert("슬러그는 소문자, 숫자, 하이픈만 포함할 수 있습니다.");
+    if (!name) {
+      alert("칼럼 이름을 입력해주세요.");
       return;
     }
 
     setIsSaving(true);
     try {
-      const payload = {
-        slug,
-        title,
-        category: category.toString(),
-        author,
-        content,
-        metaTitle: metaTitle || "",
-        metaDescription: metaDescription || "",
-        canonicalUrl: "",
-        thumbnailUrl: "",
-        published,
-      };
-
       if (columnId) {
+        // 기존 칼럼 업데이트
         await updateMutation.mutateAsync({
           id: columnId,
-          data: payload,
+          name,
         });
       } else {
-        await createMutation.mutateAsync(payload);
+        // 새 칼럼 생성
+        await createMutation.mutateAsync(name);
       }
+      setLocation("/columns");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "저장에 실패했습니다.";
-      alert(errorMessage);
+      console.error("Save failed:", error);
+      alert("저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (columnId && isLoadingColumn) {
+  if (isLoadingColumn) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-2xl mx-auto">
+        {/* 뒤로가기 */}
+        <button
           onClick={() => setLocation("/columns")}
-          className="gap-2"
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-8"
         >
-          <ArrowLeft className="w-4 h-4" />
-          돌아가기
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">
-            {columnId ? "칼럼 편집" : "새 칼럼 작성"}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {columnId ? "기존 칼럼을 수정하세요." : "새로운 칼럼을 작성하세요."}
-          </p>
-        </div>
-      </div>
+          <ArrowLeft className="w-5 h-5" />
+          칼럼 목록으로 돌아가기
+        </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 메인 콘텐츠 */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* 기본 정보 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>기본 정보</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* 편집 폼 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {columnId ? "칼럼 편집" : "새 칼럼 작성"}
+            </CardTitle>
+            <CardDescription>
+              {columnId
+                ? "기존 칼럼의 정보를 수정하세요"
+                : "새로운 칼럼을 작성하세요"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* 칼럼 이름 */}
               <div>
-                <label className="block text-sm font-medium mb-2">제목 *</label>
-                <Input
-                  placeholder="칼럼 제목을 입력하세요"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">슬러그 *</label>
-                <Input
-                  placeholder="url-friendly-slug"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">요약</label>
-                <Textarea
-                  placeholder="칼럼 요약을 입력하세요"
-                  value={excerpt}
-                  onChange={(e) => setExcerpt(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">내용 *</label>
-                <Textarea
-                  placeholder="칼럼 내용을 입력하세요 (마크다운 지원)"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={12}
-                  className="font-mono text-sm"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-            {/* SEO 메타데이터 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>SEO 메타데이터</CardTitle>
-              <CardDescription>검색 엔진 최적화를 위한 메타 정보</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">메타 제목</label>
-                <Input
-                  placeholder="SEO 메타 제목"
-                  value={metaTitle}
-                  onChange={(e) => setMetaTitle(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">메타 설명</label>
-                <Textarea
-                  placeholder="SEO 메타 설명 (160자 이내)"
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 사이드바 */}
-        <div className="space-y-6">
-          {/* 발행 설정 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>발행 설정</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">카테고리 *</label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="카테고리 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id.toString()}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">작성자</label>
-                <Input
-                  placeholder="작성자명"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="published"
-                  checked={published}
-                  onChange={(e) => setPublished(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="published" className="text-sm font-medium cursor-pointer">
-                  발행하기
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  칼럼 이름 *
                 </label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="칼럼 이름을 입력하세요"
+                  disabled={isSaving}
+                />
               </div>
 
-
-            </CardContent>
-          </Card>
-
-          {/* 액션 버튼 */}
-          <Card>
-            <CardContent className="pt-6 space-y-2">
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || !title || !content || !category || createMutation.isPending || updateMutation.isPending}
-                className="w-full"
-              >
-                {isSaving || createMutation.isPending || updateMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    저장 중...
-                  </>
-                ) : (
-                  columnId ? "수정 완료" : "작성 완료"
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setLocation("/columns")}
-                className="w-full"
-              >
-                취소
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+              {/* 저장 버튼 */}
+              <div className="flex gap-4 pt-6">
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving || !name}
+                  size="lg"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      저장 중...
+                    </>
+                  ) : (
+                    "저장하기"
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setLocation("/columns")}
+                  disabled={isSaving}
+                  size="lg"
+                >
+                  취소
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -97,7 +97,7 @@ export function useDeleteColumnData() {
   return useMutation({
     mutationFn: (id: string) => columnDataApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.columnData });
+      queryClient.invalidateQueries({ queryKey: ["columnData"] });
     },
   });
 }
