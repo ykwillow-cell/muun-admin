@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, Star } from "lucide-react";
 import { useColumnsList } from "@/lib/queries";
 import { useAuth } from "@/lib/queries";
 import Login from "./Login";
@@ -82,6 +82,15 @@ export default function Home() {
           <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-slate-900">최근 칼럼</h2>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setLocation("/featured")}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <Star className="w-4 h-4 text-yellow-500" />
+                메인 추천 칼럼
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => setLocation("/columns")}

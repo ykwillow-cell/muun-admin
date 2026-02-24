@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ColumnList from "./pages/ColumnList";
 import ColumnEditor from "./pages/ColumnEditor";
+import FeaturedColumns from "./pages/FeaturedColumns";
 import TestDB from "./pages/TestDB";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/columns"} component={ColumnList} />
       <Route path={"/columns/new"} component={ColumnEditor} />
       <Route path={"/columns/:id/edit"} component={ColumnEditor} />
+      <Route path={"/featured"} component={FeaturedColumns} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

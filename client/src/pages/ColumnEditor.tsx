@@ -30,8 +30,9 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
+import { useRef } from "react";
 import { useColumn, useCreateColumn, useUpdateColumn } from "@/lib/queries";
-import { CATEGORY_OPTIONS, type ColumnFormData } from "@/lib/supabase";
+import { CATEGORY_OPTIONS, type ColumnFormData, storageApi } from "@/lib/supabase";
 import { toast } from "sonner";
 
 function EditorToolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
@@ -155,9 +156,11 @@ export default function ColumnEditor() {
     published: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">(
     "content"
   );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: column, isLoading: isLoadingColumn } = useColumn(
     columnId || ""
@@ -233,6 +236,30 @@ export default function ColumnEditor() {
 
   const set = <K extends keyof ColumnFormData>(k: K, v: ColumnFormData[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingImage(true);
+    try {
+      const url = await storageApi.uploadThumbnail(file);
+      set("thumbnail_url", url);
+      toast.success("썸네일 이미지가 업로드되었습니다.");
+    } catch (err: any) {
+      toast.error(err.message || "이미지 업로드에 실패했습니다.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleThumbnailRemove = async () => {
+    if (form.thumbnail_url) {
+      await storageApi.deleteThumbnail(form.thumbnail_url).catch(() => {});
+    }
+    set("thumbnail_url", "");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   if (isLoadingColumn) {
     return (
@@ -578,27 +605,55 @@ export default function ColumnEditor() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {form.thumbnail_url && (
-                  <div className="aspect-video rounded-md overflow-hidden bg-slate-100">
-                    <img
-                      src={form.thumbnail_url}
-                      alt="썸네일"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
+                {form.thumbnail_url ? (
+                  <div className="space-y-2">
+                    <div className="aspect-video rounded-md overflow-hidden bg-slate-100 relative group">
+                      <img
+                        src={form.thumbnail_url}
+                        alt="썸네일"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                      onClick={handleThumbnailRemove}
+                      type="button"
+                    >
+                      이미지 삭제
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-slate-200 rounded-md p-6 text-center cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploadingImage ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+                        <p className="text-xs text-slate-500">업로드 중...</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Image className="w-8 h-8 text-slate-300" />
+                        <p className="text-sm font-medium text-slate-600">클릭하여 이미지 첨부</p>
+                        <p className="text-xs text-slate-400">JPG, PNG, WebP · 최대 3MB</p>
+                      </div>
+                    )}
                   </div>
                 )}
-                <Input
-                  value={form.thumbnail_url}
-                  onChange={(e) => set("thumbnail_url", e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="text-xs"
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={handleThumbnailUpload}
+                  disabled={isUploadingImage}
                 />
-                <p className="text-xs text-slate-400">
-                  Unsplash 등 외부 이미지 URL을 입력하세요.
-                </p>
               </CardContent>
             </Card>
 

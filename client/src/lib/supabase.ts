@@ -167,3 +167,94 @@ export const columnApi = {
     }
   },
 };
+
+// =====================================================
+// Storage API (썸네일 이미지 업로드)
+// =====================================================
+export const storageApi = {
+  async uploadThumbnail(file: File): Promise<string> {
+    const MAX_SIZE = 3 * 1024 * 1024; // 3MB
+    if (file.size > MAX_SIZE) {
+      throw new Error(`파일 크기가 3MB를 초과합니다. (현재: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+    }
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('JPG, PNG, GIF, WebP 형식의 이미지만 업로드 가능합니다.');
+    }
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { data, error } = await supabase.storage
+      .from('column-thumbnails')
+      .upload(fileName, file, { upsert: false, contentType: file.type });
+    if (error) {
+      console.error('Storage upload error:', error);
+      throw new Error('이미지 업로드에 실패했습니다.');
+    }
+    const { data: urlData } = supabase.storage
+      .from('column-thumbnails')
+      .getPublicUrl(data.path);
+    return urlData.publicUrl;
+  },
+
+  async deleteThumbnail(url: string): Promise<void> {
+    try {
+      const path = url.split('/column-thumbnails/').pop();
+      if (!path) return;
+      await supabase.storage.from('column-thumbnails').remove([path]);
+    } catch (e) {
+      console.warn('Storage delete warning:', e);
+    }
+  },
+};
+
+// =====================================================
+// Featured Columns API (메인화면 추천 칼럼)
+// =====================================================
+export interface FeaturedColumn {
+  id: string;
+  column_id: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+  column?: Column;
+}
+
+export const featuredApi = {
+  async getAll(): Promise<FeaturedColumn[]> {
+    const { data, error } = await supabase
+      .from('featured_columns')
+      .select('*, column:columns(*)')
+      .order('position', { ascending: true });
+    if (error) {
+      console.error('featuredApi getAll error:', error);
+      throw error;
+    }
+    return (data || []) as FeaturedColumn[];
+  },
+
+  async setFeatured(position: number, columnId: string): Promise<void> {
+    const { error } = await supabase
+      .from('featured_columns')
+      .upsert({ position, column_id: columnId, updated_at: new Date().toISOString() }, { onConflict: 'position' });
+    if (error) {
+      console.error('featuredApi setFeatured error:', error);
+      throw error;
+    }
+  },
+
+  async removeFeatured(position: number): Promise<void> {
+    const { error } = await supabase
+      .from('featured_columns')
+      .delete()
+      .eq('position', position);
+    if (error) {
+      console.error('featuredApi removeFeatured error:', error);
+      throw error;
+    }
+  },
+
+  async clearAll(): Promise<void> {
+    const { error } = await supabase.from('featured_columns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) throw error;
+  },
+};
