@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
     "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:dotenv",
@@ -14,6 +17,9 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "postinstall": "echo 'Build complete'",
     "init-admin": "node scripts/init-admin.mjs"
+  },
+  "volta": {
+    "node": "22.13.0"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
