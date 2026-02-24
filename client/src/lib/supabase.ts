@@ -7,7 +7,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+console.log("Supabase URL:", supabaseUrl); try { new URL(supabaseUrl); console.log("URL is valid"); } catch (e) { console.error("URL is invalid:", supabaseUrl); } export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Column operations
 export const columnApi = {
