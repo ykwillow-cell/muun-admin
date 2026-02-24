@@ -65,16 +65,8 @@ export default function ColumnEditor() {
     }
   }, [column]);
 
-  // 제목 변경 시 슬러그 자동 생성
-  useEffect(() => {
-    if (!columnId && title) {
-      const newSlug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-      setSlug(newSlug);
-    }
-  }, [title, columnId]);
+  // 슬러그는 사용자가 단직 입력하도록 지정
+  // 자동 생성은 한글 처리 문제로 비활성화
 
   // 칼럼 업데이트
   const updateMutation = trpc.columns.update.useMutation({
@@ -84,8 +76,14 @@ export default function ColumnEditor() {
   });
 
   const handleSave = async () => {
-    if (!title || !content || !category) {
+    if (!title || !content || !category || !slug) {
       alert("필수 항목을 입력해주세요.");
+      return;
+    }
+
+    // 슬러그 형식 검증
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      alert("슬러그는 소문자, 숫자, 하이픈만 포함할 수 있습니다.");
       return;
     }
 
