@@ -1,5 +1,6 @@
 import { eq, and, like, desc } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertUser, users, columns, categories, Column, InsertColumn, Category, InsertCategory, admins, Admin, InsertAdmin } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import bcrypt from "bcrypt";
@@ -8,9 +9,11 @@ let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db && (ENV.databaseUrl || process.env.DATABASE_URL)) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const dbUrl = ENV.databaseUrl || process.env.DATABASE_URL;
+      const client = postgres(dbUrl!);
+      _db = drizzle(client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -69,7 +72,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    // PostgreSQL upsert using ON CONFLICT
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -207,7 +212,13 @@ export async function createColumn(data: InsertColumn): Promise<Column | null> {
 
   try {
     const result = await db.insert(columns).values(data);
-    const id = (result as any).insertId;
+    const id = (result as any).insertId ?? (result as any)[0]?.insertId ?? (result as any).lastInsertRowid;
+    
+    if (!id) {
+      console.error("[Database] Failed to extract insertId from result:", result);
+      return null;
+    }
+    
     const column = await getColumnById(id);
     return column || null;
   } catch (error) {

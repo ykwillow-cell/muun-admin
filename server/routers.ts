@@ -309,6 +309,43 @@ export const appRouter = router({
 
         return { success: true };
       }),
+
+    /**
+     * 공개 칼럼 목록 조회 (발행된 칼럼만, 인증 불필요)
+     */
+    publicList: publicProcedure
+      .input(
+        z.object({
+          category: z.string().optional(),
+          limit: z.number().default(100),
+        })
+      )
+      .query(async ({ input }) => {
+        const items = await getColumns({
+          category: input.category,
+          published: true,
+          limit: input.limit,
+        });
+
+        return items;
+      }),
+
+    /**
+     * 공개 칼럼 상세 조회 (발행된 칼럼만, 슬러그로 조회)
+     */
+    publicGetBySlug: publicProcedure
+      .input(z.string())
+      .query(async ({ input }) => {
+        const column = await getColumnBySlug(input);
+        if (!column || !column.published) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "칼럼을 찾을 수 없습니다.",
+          });
+        }
+
+        return column;
+      }),
   }),
 
   // ==================== 카테고리 관련 프로시저 ====================
@@ -338,7 +375,7 @@ export const appRouter = router({
           });
         }
 
-        return await createCategory(input.name, input.slug);
+        return await createCategory({ name: input.name, slug: input.slug });
       }),
   }),
 });
