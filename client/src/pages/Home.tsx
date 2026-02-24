@@ -100,7 +100,7 @@ export default function Home() {
           <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-slate-900">칼럼 목록</h2>
             <Button
-              onClick={() => setLocation("/column/new")}
+              onClick={() => setLocation("/columns/new")}
               size="sm"
             >
               새 칼럼 작성
