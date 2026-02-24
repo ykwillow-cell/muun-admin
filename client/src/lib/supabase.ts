@@ -1,13 +1,26 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://vuifbmsdggnwygvgcrkj.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1aWZibXNkZ2dud3lndmdjcmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTM0MDAsImV4cCI6MjA1NjAwOTQwMH0.some_part_of_key";
+const DEFAULT_URL = "https://vuifbmsdggnwygvgcrkj.supabase.co";
+const DEFAULT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1aWZibXNkZ2dud3lndmdjcmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTM0MDAsImV4cCI6MjA1NjAwOTQwMH0.some_part_of_key";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
+let supabaseUrl = DEFAULT_URL;
+let supabaseAnonKey = DEFAULT_KEY;
+
+try {
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  
+  if (envUrl && envUrl.startsWith("http")) {
+    supabaseUrl = envUrl;
+  }
+  if (envKey && envKey.length > 20) {
+    supabaseAnonKey = envKey;
+  }
+} catch (e) {
+  console.warn("Failed to read env variables, using defaults");
 }
 
-console.log("Supabase URL:", supabaseUrl); try { new URL(supabaseUrl); console.log("URL is valid"); } catch (e) { console.error("URL is invalid:", supabaseUrl); } export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Column operations
 export const columnApi = {
@@ -19,7 +32,6 @@ export const columnApi = {
     if (error) throw error;
     return data;
   },
-
   async create(name: string) {
     const { data, error } = await supabase
       .from("columns")
@@ -29,7 +41,6 @@ export const columnApi = {
     if (error) throw error;
     return data;
   },
-
   async update(id: string, name: string) {
     const { data, error } = await supabase
       .from("columns")
@@ -40,7 +51,6 @@ export const columnApi = {
     if (error) throw error;
     return data;
   },
-
   async delete(id: string) {
     const { error } = await supabase.from("columns").delete().eq("id", id);
     if (error) throw error;
@@ -58,7 +68,6 @@ export const columnDataApi = {
     if (error) throw error;
     return data;
   },
-
   async upsert(columnId: string, rowIndex: number, value: string) {
     const { data, error } = await supabase
       .from("column_data")
@@ -71,7 +80,6 @@ export const columnDataApi = {
     if (error) throw error;
     return data;
   },
-
   async delete(id: string) {
     const { error } = await supabase.from("column_data").delete().eq("id", id);
     if (error) throw error;
