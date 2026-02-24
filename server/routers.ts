@@ -27,11 +27,11 @@ const columnSchema = z.object({
     .min(1, "슬러그는 필수입니다")
     .regex(/^[a-z0-9-]+$/, "슬러그는 소문자, 숫자, 하이픈만 포함할 수 있습니다"),
   title: z.string().min(1, "제목은 필수입니다").max(255),
-  category: z.string().min(1, "카테고리는 필수입니다"),
+  category: z.string().min(1, "카테고리는 필수입니다").or(z.number().transform(n => n.toString())),
   author: z.string().default("무운 역술팀"),
   content: z.string().min(1, "내용은 필수입니다"),
-  metaTitle: z.string().min(1, "메타 제목은 필수입니다").max(60),
-  metaDescription: z.string().min(1, "메타 설명은 필수입니다").max(160),
+  metaTitle: z.string().max(60).optional().or(z.literal("")),
+  metaDescription: z.string().max(160).optional().or(z.literal("")),
   canonicalUrl: z.string().url().optional().or(z.literal("")),
   thumbnailUrl: z.string().url().optional().or(z.literal("")),
   readingTime: z.number().int().positive().optional(),
@@ -100,7 +100,7 @@ export const appRouter = router({
   }),
 
   // ==================== 칼럼 관련 프로시저 ====================
-  columns: router({
+    columns: router({
     /**
      * 칼럼 목록 조회 (검색, 필터링, 페이지네이션)
      */
@@ -176,6 +176,7 @@ export const appRouter = router({
     create: protectedProcedure
       .input(columnSchema)
       .mutation(async ({ input, ctx }) => {
+        // 관리자 권한 확인
         if (ctx.user?.role !== "admin") {
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -230,6 +231,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
+        // 관리자 권한 확인
         if (ctx.user?.role !== "admin") {
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -277,6 +279,7 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.number())
       .mutation(async ({ input, ctx }) => {
+        // 관리자 권한 확인
         if (ctx.user?.role !== "admin") {
           throw new TRPCError({
             code: "FORBIDDEN",

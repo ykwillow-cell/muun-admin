@@ -94,11 +94,11 @@ export default function ColumnEditor() {
       const payload = {
         slug,
         title,
-        category,
+        category: category.toString(),
         author,
         content,
-        metaTitle,
-        metaDescription,
+        metaTitle: metaTitle || "",
+        metaDescription: metaDescription || "",
         canonicalUrl: "",
         thumbnailUrl: "",
         published,
@@ -112,6 +112,9 @@ export default function ColumnEditor() {
       } else {
         await createMutation.mutateAsync(payload);
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "저장에 실패했습니다.";
+      alert(errorMessage);
     } finally {
       setIsSaving(false);
     }
