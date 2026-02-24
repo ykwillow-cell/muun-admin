@@ -1,24 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-const DEFAULT_URL = "https://vuifbmsdggnwygvgcrkj.supabase.co";
-const DEFAULT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1aWZibXNkZ2dud3lndmdjcmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTM0MDAsImV4cCI6MjA1NjAwOTQwMH0.some_part_of_key";
-
-let supabaseUrl = DEFAULT_URL;
-let supabaseAnonKey = DEFAULT_KEY;
-
-try {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL;
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  
-  if (envUrl && envUrl.startsWith("http")) {
-    supabaseUrl = envUrl;
-  }
-  if (envKey && envKey.length > 20) {
-    supabaseAnonKey = envKey;
-  }
-} catch (e) {
-  console.warn("Failed to read env variables, using defaults");
-}
+const supabaseUrl = "https://vuifbmsdggnwygvgcrkj.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1aWZibXNkZ2dud3lndmdjcmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTM0MDAsImV4cCI6MjA1NjAwOTQwMH0.some_part_of_key";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
