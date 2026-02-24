@@ -8,11 +8,13 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ColumnList from "./pages/ColumnList";
 import ColumnEditor from "./pages/ColumnEditor";
+import TestDB from "./pages/TestDB";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
+      <Route path={"/test-db"} component={TestDB} />
       <Route path={"/login"} component={Login} />
       <Route path={"/"} component={Home} />
       <Route path={"/columns"} component={ColumnList} />

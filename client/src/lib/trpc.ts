@@ -1,4 +1,5 @@
-import { createTRPCReact } from "@trpc/react-query";
-import type { AppRouter } from "../../../server/routers";
+// This file is kept for backwards compatibility
+// All data operations now use Supabase directly
+// Import from ./supabase.ts instead
 
-export const trpc = createTRPCReact<AppRouter>();
+export { supabase, columnApi, columnDataApi } from "./supabase";

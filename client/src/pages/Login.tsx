@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
 import { Loader2, AlertCircle } from "lucide-react";
 
 /**
  * Login Page - 이메일/비밀번호 로그인
- * 관리자 1명만 로그인 가능
+ * Supabase 인증 사용
  */
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -15,19 +15,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const utils = trpc.useUtils();
-
-  const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: async () => {
-      // 로그인 성공 후 auth.me 캐시 무효화
-      await utils.auth.me.invalidate();
-      // 대시보드로 이동
-      setLocation("/");
-    },
-    onError: (error) => {
-      setError(error.message || "로그인에 실패했습니다.");
-    },
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,12 +22,24 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await loginMutation.mutateAsync({
-        email,
-        password,
-      });
+      const { data, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+      if (authError) {
+        setError(authError.message || "로그인에 실패했습니다.");
+        return;
+      }
+
+      if (data.user) {
+        // 로그인 성공 - 대시보드로 이동
+        setLocation("/");
+      }
     } catch (err) {
-      // 에러는 onError에서 처리
+      setError("로그인 중 오류가 발생했습니다.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -61,49 +60,44 @@ export default function Login() {
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
 
         {/* 로그인 폼 */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               이메일
             </label>
             <Input
-              id="email"
               type="email"
-              placeholder="admin@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@example.com"
               disabled={isLoading}
               required
-              className="w-full"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               비밀번호
             </label>
             <Input
-              id="password"
               type="password"
-              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               disabled={isLoading}
               required
-              className="w-full"
             />
           </div>
 
           <Button
             type="submit"
-            disabled={isLoading || !email || !password}
-            className="w-full h-12 text-lg font-semibold"
-            variant="default"
+            disabled={isLoading}
+            className="w-full"
           >
             {isLoading ? (
               <>
@@ -116,10 +110,10 @@ export default function Login() {
           </Button>
         </form>
 
-        {/* 추가 정보 */}
-        <div className="mt-6 text-center text-sm text-slate-600">
-          <p>관리자 계정으로만 로그인할 수 있습니다</p>
-        </div>
+        {/* 안내 메시지 */}
+        <p className="text-xs text-slate-500 text-center mt-6">
+          관리자 계정으로만 로그인 가능합니다
+        </p>
       </div>
     </div>
   );

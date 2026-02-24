@@ -7,16 +7,12 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:dotenv",
-    "start": "NODE_ENV=production node dist/index.js",
-    "vercel-build": "pnpm build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
-    "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "postinstall": "echo 'Build complete'",
-    "init-admin": "node scripts/init-admin.mjs"
+    "test": "vitest run"
   },
   "volta": {
     "node": "22.13.0"
@@ -65,30 +61,28 @@
     "@tiptap/pm": "^3.20.0",
     "@tiptap/react": "^3.20.0",
     "@tiptap/starter-kit": "^3.20.0",
-    "@trpc/client": "^11.6.0",
-    "@trpc/react-query": "^11.6.0",
-    "@trpc/server": "^11.6.0",
+    "@supabase/supabase-js": "^2.45.0",
     "ai": "^6.0.38",
     "axios": "^1.12.0",
-    "bcrypt": "^6.0.0",
+
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "cookie": "^1.0.2",
+
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
-    "drizzle-orm": "^0.44.5",
+
     "embla-carousel-react": "^8.6.0",
-    "express": "^4.21.2",
+
     "framer-motion": "^12.23.22",
     "input-otp": "^1.4.2",
-    "jose": "6.1.0",
+
     "lowlight": "^3.3.0",
     "lucide-react": "^0.453.0",
-    "mysql2": "^3.15.0",
+
     "nanoid": "^5.1.5",
     "next-themes": "^0.4.6",
-    "postgres": "^3.4.8",
+
     "react": "^19.2.1",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.1",
