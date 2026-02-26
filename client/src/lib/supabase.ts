@@ -54,6 +54,9 @@ export const CATEGORY_OPTIONS = [
   { value: "health", label: "건강 & 운" },
   { value: "money", label: "재물운" },
   { value: "flow", label: "운명의 흐름" },
+  { value: "career", label: "취업 & 커리어" },
+  { value: "love", label: "연애 & 결혼" },
+  { value: "family", label: "가족 & 자녀" },
 ];
 
 // =====================================================
