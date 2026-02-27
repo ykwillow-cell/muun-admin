@@ -580,3 +580,120 @@ export const dictionaryApi = {
     }
   },
 };
+
+// =====================================================
+// 임베딩 유사도 검사 API (꿈해몽 중복 방지)
+// =====================================================
+
+export interface SimilarDream {
+  id: string;
+  keyword: string;
+  slug: string;
+  similarity: number;
+}
+
+/**
+ * OpenAI text-embedding-3-small 모델로 텍스트 임베딩 생성
+ */
+export async function getEmbedding(text: string): Promise<number[]> {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!apiKey) throw new Error("VITE_OPENAI_API_KEY가 설정되지 않았습니다.");
+
+  const response = await fetch("https://api.openai.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "text-embedding-3-small",
+      input: text,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(`OpenAI API 오류: ${err.error?.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.data[0].embedding as number[];
+}
+
+/**
+ * 코사인 유사도 계산 (0~1, 1에 가까울수록 유사)
+ */
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+/**
+ * 새 키워드와 기존 꿈해몽 목록의 유사도를 검사하여
+ * 90% 이상 유사한 항목을 반환
+ */
+export async function checkDreamSimilarity(
+  keyword: string,
+  excludeId?: string
+): Promise<SimilarDream[]> {
+  // 1. 새 키워드의 임베딩 생성
+  const newEmbedding = await getEmbedding(keyword);
+
+  // 2. 기존 꿈해몽 목록 조회 (embedding 포함)
+  const { data, error } = await supabase
+    .from("dreams")
+    .select("id, keyword, slug, embedding")
+    .not("embedding", "is", null);
+
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  // 3. 유사도 계산 및 90% 이상 필터링
+  const results: SimilarDream[] = [];
+  for (const dream of data) {
+    if (excludeId && dream.id === excludeId) continue;
+    if (!dream.embedding) continue;
+
+    // Supabase에서 vector는 문자열 또는 배열로 반환될 수 있음
+    let embeddingArr: number[];
+    if (typeof dream.embedding === "string") {
+      embeddingArr = JSON.parse(dream.embedding);
+    } else {
+      embeddingArr = dream.embedding as number[];
+    }
+
+    const similarity = cosineSimilarity(newEmbedding, embeddingArr);
+    if (similarity >= 0.9) {
+      results.push({
+        id: dream.id,
+        keyword: dream.keyword,
+        slug: dream.slug,
+        similarity: Math.round(similarity * 100),
+      });
+    }
+  }
+
+  // 유사도 내림차순 정렬
+  return results.sort((a, b) => b.similarity - a.similarity);
+}
+
+/**
+ * 꿈해몽 저장 후 해당 항목의 embedding을 업데이트
+ */
+export async function updateDreamEmbedding(id: string, keyword: string): Promise<void> {
+  try {
+    const embedding = await getEmbedding(keyword);
+    const { error } = await supabase
+      .from("dreams")
+      .update({ embedding: JSON.stringify(embedding) })
+      .eq("id", id);
+    if (error) console.error("embedding 업데이트 오류:", error);
+  } catch (err) {
+    console.error("임베딩 생성 오류:", err);
+  }
+}

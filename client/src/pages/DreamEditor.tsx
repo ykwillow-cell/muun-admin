@@ -8,6 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 import {
   Loader2,
@@ -17,12 +25,17 @@ import {
   Globe,
   FileText,
   Settings,
+  AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { useDream, useCreateDream, useUpdateDream } from "@/lib/queries";
 import {
   DREAM_CATEGORY_OPTIONS,
   DREAM_GRADE_OPTIONS,
   type DreamFormData,
+  type SimilarDream,
+  checkDreamSimilarity,
+  updateDreamEmbedding,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -49,6 +62,12 @@ export default function DreamEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
+  // 유사도 검사 관련 상태
+  const [isCheckingSimilarity, setIsCheckingSimilarity] = useState(false);
+  const [similarDreams, setSimilarDreams] = useState<SimilarDream[]>([]);
+  const [showSimilarityDialog, setShowSimilarityDialog] = useState(false);
+  const [pendingPublish, setPendingPublish] = useState<boolean | undefined>(undefined);
 
   const { data: dream, isLoading: isLoadingDream } = useDream(dreamId || "");
   const createMutation = useCreateDream();
@@ -78,12 +97,45 @@ export default function DreamEditor() {
   const handleKeywordChange = (value: string) => {
     setForm((prev) => ({ ...prev, keyword: value }));
     if (!slugManuallyEdited) {
-      // 자동 slug 생성: 한글 키워드를 그대로 사용 (서버에서 타임스탬프 추가)
       const autoSlug = value.replace(/\s+/g, "-").toLowerCase();
       setForm((prev) => ({ ...prev, keyword: value, slug: autoSlug }));
     }
   };
 
+  /**
+   * 실제 저장 실행 (유사도 확인 후 또는 강제 저장 시 호출)
+   */
+  const executeSave = async (publishNow?: boolean) => {
+    setIsSaving(true);
+    try {
+      const saveData = {
+        ...form,
+        published: publishNow !== undefined ? publishNow : form.published,
+      };
+      let savedId: string;
+      if (isEditMode && dreamId) {
+        const updated = await updateMutation.mutateAsync({ id: dreamId, formData: saveData });
+        savedId = updated.id;
+        toast.success("꿈해몽이 수정되었습니다.");
+      } else {
+        const created = await createMutation.mutateAsync(saveData);
+        savedId = created.id;
+        toast.success("꿈해몽이 저장되었습니다.");
+      }
+      // 저장 후 백그라운드에서 embedding 업데이트
+      updateDreamEmbedding(savedId, form.keyword).catch(console.error);
+      setLocation("/dreams");
+    } catch (err) {
+      console.error("Save failed:", err);
+      toast.error("저장에 실패했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  /**
+   * 저장 버튼 클릭 시: 유사도 검사 → 경고 팝업 or 바로 저장
+   */
   const handleSave = async (publishNow?: boolean) => {
     if (!form.keyword.trim()) {
       toast.error("꿈 키워드를 입력해주세요.");
@@ -93,25 +145,33 @@ export default function DreamEditor() {
       toast.error("꿈 해석 내용을 입력해주세요.");
       return;
     }
-    setIsSaving(true);
+
+    // OpenAI API 키가 없으면 유사도 검사 없이 바로 저장
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      await executeSave(publishNow);
+      return;
+    }
+
+    setIsCheckingSimilarity(true);
     try {
-      const saveData = {
-        ...form,
-        published: publishNow !== undefined ? publishNow : form.published,
-      };
-      if (isEditMode && dreamId) {
-        await updateMutation.mutateAsync({ id: dreamId, formData: saveData });
-        toast.success("꿈해몽이 수정되었습니다.");
+      const similar = await checkDreamSimilarity(form.keyword, isEditMode ? dreamId : undefined);
+      if (similar.length > 0) {
+        // 유사한 항목 발견 → 경고 팝업 표시
+        setSimilarDreams(similar);
+        setPendingPublish(publishNow);
+        setShowSimilarityDialog(true);
       } else {
-        await createMutation.mutateAsync(saveData);
-        toast.success("꿈해몽이 저장되었습니다.");
+        // 유사 항목 없음 → 바로 저장
+        await executeSave(publishNow);
       }
-      setLocation("/dreams");
     } catch (err) {
-      console.error("Save failed:", err);
-      toast.error("저장에 실패했습니다.");
+      console.error("유사도 검사 오류:", err);
+      // 유사도 검사 실패 시 경고 없이 저장 진행
+      toast.warning("유사도 검사를 건너뛰고 저장합니다.");
+      await executeSave(publishNow);
     } finally {
-      setIsSaving(false);
+      setIsCheckingSimilarity(false);
     }
   };
 
@@ -138,8 +198,86 @@ export default function DreamEditor() {
         : "text-slate-600 hover:bg-slate-100"
     }`;
 
+  const isBusy = isSaving || isCheckingSimilarity;
+
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* 유사 항목 경고 팝업 */}
+      <Dialog open={showSimilarityDialog} onOpenChange={setShowSimilarityDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-700">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              유사한 꿈해몽이 있습니다
+            </DialogTitle>
+            <DialogDescription className="text-slate-600 mt-1">
+              입력하신 키워드 <strong className="text-slate-900">"{form.keyword}"</strong>와(과){" "}
+              <strong className="text-amber-700">90% 이상 유사한 글</strong>이 이미 등록되어 있습니다.
+              그래도 등록하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* 유사 항목 목록 */}
+          <div className="my-2 space-y-2 max-h-52 overflow-y-auto">
+            {similarDreams.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      item.similarity >= 98
+                        ? "bg-red-100 text-red-700"
+                        : item.similarity >= 95
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {item.similarity}% 유사
+                  </span>
+                  <span className="text-sm font-medium text-slate-800 truncate">
+                    {item.keyword}
+                  </span>
+                </div>
+                <a
+                  href={`https://muunsaju.com/dream/${item.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 flex-shrink-0 ml-2"
+                >
+                  확인
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSimilarityDialog(false);
+                setSimilarDreams([]);
+                setPendingPublish(undefined);
+              }}
+              className="flex-1"
+            >
+              취소 (수정하기)
+            </Button>
+            <Button
+              onClick={async () => {
+                setShowSimilarityDialog(false);
+                await executeSave(pendingPublish);
+              }}
+              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              그래도 등록하기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* 상단 헤더 */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -182,9 +320,9 @@ export default function DreamEditor() {
               variant="outline"
               size="sm"
               onClick={() => handleSave(false)}
-              disabled={isSaving}
+              disabled={isBusy}
             >
-              {isSaving ? (
+              {isBusy ? (
                 <Loader2 className="w-4 h-4 mr-1 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-1" />
@@ -194,10 +332,10 @@ export default function DreamEditor() {
             <Button
               size="sm"
               onClick={() => handleSave(true)}
-              disabled={isSaving}
+              disabled={isBusy}
               className="bg-green-600 hover:bg-green-700"
             >
-              {isSaving ? (
+              {isBusy ? (
                 <Loader2 className="w-4 h-4 mr-1 animate-spin" />
               ) : (
                 <Globe className="w-4 h-4 mr-1" />
@@ -206,6 +344,15 @@ export default function DreamEditor() {
             </Button>
           </div>
         </div>
+        {/* 유사도 검사 중 진행 표시 */}
+        {isCheckingSimilarity && (
+          <div className="bg-blue-50 border-t border-blue-100 px-4 py-2 flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+            <span className="text-sm text-blue-700">
+              유사한 꿈해몽이 있는지 확인하는 중입니다...
+            </span>
+          </div>
+        )}
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -245,7 +392,7 @@ export default function DreamEditor() {
                         className="text-lg font-medium"
                       />
                       <p className="text-xs text-slate-400 mt-1">
-                        검색 및 페이지 제목에 사용됩니다.
+                        검색 및 페이지 제목에 사용됩니다. 저장 시 유사한 키워드가 있으면 알림이 표시됩니다.
                       </p>
                     </div>
 
@@ -285,7 +432,7 @@ export default function DreamEditor() {
                       <Textarea
                         value={form.psychological_meaning}
                         onChange={(e) => set("psychological_meaning", e.target.value)}
-                        placeholder="현대 심리학적 관점에서의 해석을 작성하세요..."
+                        placeholder="심리학적 관점에서의 꿈 해석을 작성하세요..."
                         rows={4}
                         className="resize-none"
                       />
@@ -514,11 +661,11 @@ export default function DreamEditor() {
                 <div className="flex flex-col gap-2">
                   <Button
                     onClick={() => handleSave(true)}
-                    disabled={isSaving}
+                    disabled={isBusy}
                     className="w-full bg-green-600 hover:bg-green-700"
                     size="sm"
                   >
-                    {isSaving ? (
+                    {isBusy ? (
                       <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                     ) : (
                       <Globe className="w-4 h-4 mr-1" />
@@ -528,7 +675,7 @@ export default function DreamEditor() {
                   <Button
                     variant="outline"
                     onClick={() => handleSave(false)}
-                    disabled={isSaving}
+                    disabled={isBusy}
                     className="w-full"
                     size="sm"
                   >
@@ -575,6 +722,22 @@ export default function DreamEditor() {
                     </p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* 유사도 검사 안내 */}
+            <Card className="border-blue-100 bg-blue-50">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-blue-800 mb-1">중복 방지 기능 활성화</p>
+                    <p className="text-xs text-blue-600">
+                      저장 시 AI가 기존 꿈해몽과 유사도를 자동으로 검사합니다.
+                      90% 이상 유사한 항목이 있으면 알림이 표시됩니다.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
