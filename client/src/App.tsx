@@ -12,6 +12,8 @@ import FeaturedColumns from "./pages/FeaturedColumns";
 import TestDB from "./pages/TestDB";
 import DreamList from "./pages/DreamList";
 import DreamEditor from "./pages/DreamEditor";
+import DictionaryList from "./pages/DictionaryList";
+import DictionaryEditor from "./pages/DictionaryEditor";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +29,9 @@ function Router() {
       <Route path={"/dreams"} component={DreamList} />
       <Route path={"/dreams/new"} component={DreamEditor} />
       <Route path={"/dreams/:id/edit"} component={DreamEditor} />
+      <Route path={"/dictionary"} component={DictionaryList} />
+      <Route path={"/dictionary/new"} component={DictionaryEditor} />
+      <Route path={"/dictionary/:id/edit"} component={DictionaryEditor} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

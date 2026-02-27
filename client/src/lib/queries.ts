@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase, columnApi, dreamApi, type ColumnFormData, type DreamFormData } from "./supabase";
+import { supabase, columnApi, dreamApi, dictionaryApi, type ColumnFormData, type DreamFormData, type FortuneDictionaryFormData } from "./supabase";
 
 // Query keys
 export const queryKeys = {
@@ -8,6 +8,8 @@ export const queryKeys = {
   dreams: ["dreams"] as const,
   dreamDetail: (id: string) => ["dreams", id] as const,
   auth: ["auth"] as const,
+  dictionary: ["dictionary"] as const,
+  dictionaryDetail: (id: string) => ["dictionary", id] as const,
 };
 
 // Columns queries
@@ -105,6 +107,54 @@ export function useDeleteDream() {
     mutationFn: (id: string) => dreamApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.dreams });
+    },
+  });
+}
+
+// Dictionary queries
+export function useDictionaryList() {
+  return useQuery({
+    queryKey: queryKeys.dictionary,
+    queryFn: () => dictionaryApi.getAll(),
+  });
+}
+
+export function useDictionary(id: string) {
+  return useQuery({
+    queryKey: queryKeys.dictionaryDetail(id),
+    queryFn: () => dictionaryApi.getById(id),
+    enabled: !!id,
+  });
+}
+
+export function useCreateDictionary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (formData: FortuneDictionaryFormData) => dictionaryApi.create(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dictionary });
+    },
+  });
+}
+
+export function useUpdateDictionary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: Partial<FortuneDictionaryFormData> }) =>
+      dictionaryApi.update(id, formData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dictionary });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dictionaryDetail(data.id) });
+    },
+  });
+}
+
+export function useDeleteDictionary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => dictionaryApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dictionary });
     },
   });
 }

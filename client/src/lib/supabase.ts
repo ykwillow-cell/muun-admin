@@ -416,3 +416,167 @@ export const featuredApi = {
     if (error) throw error;
   },
 };
+
+// =====================================================
+// Fortune Dictionary API (운세 사전)
+// =====================================================
+export interface FortuneDictionary {
+  id: string;
+  title: string;
+  slug: string;
+  subtitle: string | null;
+  summary: string;
+  original_meaning: string;
+  modern_interpretation: string;
+  muun_advice: string;
+  category: string;
+  tags: string[] | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FortuneDictionaryFormData {
+  title: string;
+  slug: string;
+  subtitle: string;
+  summary: string;
+  original_meaning: string;
+  modern_interpretation: string;
+  muun_advice: string;
+  category: string;
+  tags: string;
+  meta_title: string;
+  meta_description: string;
+  published: boolean;
+}
+
+export const DICTIONARY_CATEGORY_OPTIONS = [
+  { value: "basic", label: "사주 기초" },
+  { value: "tenGod", label: "십신" },
+  { value: "earthly", label: "지지" },
+  { value: "heavenly", label: "천간" },
+  { value: "luck", label: "운세 개념" },
+  { value: "relationship", label: "관계 & 궁합" },
+  { value: "health", label: "건강 & 신체" },
+  { value: "money", label: "재물 & 직업" },
+  { value: "other", label: "기타" },
+];
+
+function generateDictionarySlug(title: string): string {
+  const timestamp = Date.now();
+  const sanitized = title
+    .replace(/[^\w\s가-힣]/g, "")
+    .replace(/\s+/g, "-")
+    .toLowerCase();
+  return `${sanitized}-${timestamp}`;
+}
+
+export const dictionaryApi = {
+  async getAll() {
+    const { data, error } = await supabase
+      .from("fortune_dictionary")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("dictionaryApi getAll error:", error);
+      throw error;
+    }
+    return (data || []) as FortuneDictionary[];
+  },
+
+  async getById(id: string) {
+    const { data, error } = await supabase
+      .from("fortune_dictionary")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) {
+      console.error("dictionaryApi getById error:", error);
+      throw error;
+    }
+    return data as FortuneDictionary;
+  },
+
+  async create(formData: FortuneDictionaryFormData) {
+    const slug = formData.slug || generateDictionarySlug(formData.title);
+    const tagsArray = formData.tags
+      ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
+
+    const insertData: Record<string, unknown> = {
+      title: formData.title,
+      slug,
+      subtitle: formData.subtitle || null,
+      summary: formData.summary,
+      original_meaning: formData.original_meaning,
+      modern_interpretation: formData.modern_interpretation,
+      muun_advice: formData.muun_advice,
+      category: formData.category || "basic",
+      tags: tagsArray.length > 0 ? tagsArray : [],
+      meta_title: formData.meta_title || null,
+      meta_description: formData.meta_description || null,
+      published: formData.published || false,
+      published_at: formData.published ? new Date().toISOString() : null,
+    };
+
+    const { data, error } = await supabase
+      .from("fortune_dictionary")
+      .insert([insertData])
+      .select()
+      .single();
+    if (error) {
+      console.error("dictionaryApi create error:", error);
+      throw error;
+    }
+    return data as FortuneDictionary;
+  },
+
+  async update(id: string, formData: Partial<FortuneDictionaryFormData>) {
+    const updateData: Record<string, unknown> = {};
+    if (formData.title !== undefined) updateData.title = formData.title;
+    if (formData.slug !== undefined) updateData.slug = formData.slug;
+    if (formData.subtitle !== undefined) updateData.subtitle = formData.subtitle || null;
+    if (formData.summary !== undefined) updateData.summary = formData.summary;
+    if (formData.original_meaning !== undefined) updateData.original_meaning = formData.original_meaning;
+    if (formData.modern_interpretation !== undefined) updateData.modern_interpretation = formData.modern_interpretation;
+    if (formData.muun_advice !== undefined) updateData.muun_advice = formData.muun_advice;
+    if (formData.category !== undefined) updateData.category = formData.category;
+    if (formData.tags !== undefined) {
+      const tagsArray = formData.tags
+        ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean)
+        : [];
+      updateData.tags = tagsArray;
+    }
+    if (formData.meta_title !== undefined) updateData.meta_title = formData.meta_title || null;
+    if (formData.meta_description !== undefined) updateData.meta_description = formData.meta_description || null;
+    if (formData.published !== undefined) {
+      updateData.published = formData.published;
+      if (formData.published) updateData.published_at = new Date().toISOString();
+    }
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("fortune_dictionary")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      console.error("dictionaryApi update error:", error);
+      throw error;
+    }
+    return data as FortuneDictionary;
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase.from("fortune_dictionary").delete().eq("id", id);
+    if (error) {
+      console.error("dictionaryApi delete error:", error);
+      throw error;
+    }
+  },
+};
