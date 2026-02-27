@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { FileText, Loader2, Star } from "lucide-react";
-import { useColumnsList } from "@/lib/queries";
+import { FileText, Loader2, Star, Moon } from "lucide-react";
+import { useColumnsList, useDreamsList } from "@/lib/queries";
 import { useAuth } from "@/lib/queries";
 import Login from "./Login";
 
@@ -9,6 +9,7 @@ export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { data: columns = [], isLoading: isLoadingColumns } = useColumnsList();
+  const { data: dreams = [], isLoading: isLoadingDreams } = useDreamsList();
 
   if (loading) {
     return (
@@ -24,6 +25,8 @@ export default function Home() {
 
   const publishedCount = columns.filter((c: any) => c.published).length;
   const draftCount = columns.length - publishedCount;
+  const publishedDreamsCount = dreams.filter((d: any) => d.published).length;
+  const draftDreamsCount = dreams.length - publishedDreamsCount;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -67,12 +70,49 @@ export default function Home() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600">임시저장</p>
+                <p className="text-sm text-slate-600">임시저장 칼럼</p>
                 <p className="text-3xl font-bold text-yellow-600 mt-2">
                   {isLoadingColumns ? "-" : draftCount}
                 </p>
               </div>
               <FileText className="w-12 h-12 text-yellow-500 opacity-20" />
+            </div>
+          </div>
+        </div>
+
+        {/* 꿈해몽 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">전체 꿈해몽</p>
+                <p className="text-3xl font-bold text-slate-900 mt-2">
+                  {isLoadingDreams ? "-" : dreams.length}
+                </p>
+              </div>
+              <Moon className="w-12 h-12 text-purple-500 opacity-20" />
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">발행된 꿈해몽</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">
+                  {isLoadingDreams ? "-" : publishedDreamsCount}
+                </p>
+              </div>
+              <Moon className="w-12 h-12 text-green-500 opacity-20" />
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">임시저장 꿈해몽</p>
+                <p className="text-3xl font-bold text-yellow-600 mt-2">
+                  {isLoadingDreams ? "-" : draftDreamsCount}
+                </p>
+              </div>
+              <Moon className="w-12 h-12 text-yellow-500 opacity-20" />
             </div>
           </div>
         </div>
@@ -90,6 +130,15 @@ export default function Home() {
               >
                 <Star className="w-4 h-4 text-yellow-500" />
                 메인 추천 칼럼
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setLocation("/dreams")}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <Moon className="w-4 h-4 text-purple-500" />
+                꿈해몽 관리
               </Button>
               <Button
                 variant="outline"

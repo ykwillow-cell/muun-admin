@@ -211,6 +211,161 @@ export const storageApi = {
 };
 
 // =====================================================
+// Dream API (꿈해몽)
+// =====================================================
+export interface Dream {
+  id: string;
+  keyword: string;
+  slug: string;
+  interpretation: string;
+  traditional_meaning: string | null;
+  psychological_meaning: string | null;
+  category: string;
+  grade: string;
+  score: number;
+  meta_title: string | null;
+  meta_description: string | null;
+  published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DreamFormData {
+  keyword: string;
+  slug: string;
+  interpretation: string;
+  traditional_meaning: string;
+  psychological_meaning: string;
+  category: string;
+  grade: string;
+  score: number;
+  meta_title: string;
+  meta_description: string;
+  published: boolean;
+}
+
+export const DREAM_CATEGORY_OPTIONS = [
+  { value: "animal", label: "동물" },
+  { value: "nature", label: "자연" },
+  { value: "person", label: "사람" },
+  { value: "object", label: "사물" },
+  { value: "action", label: "행동" },
+  { value: "emotion", label: "감정" },
+  { value: "place", label: "장소" },
+  { value: "other", label: "기타" },
+];
+
+export const DREAM_GRADE_OPTIONS = [
+  { value: "great", label: "길몽" },
+  { value: "good", label: "보통" },
+  { value: "bad", label: "흉몽" },
+];
+
+function generateSlug(keyword: string): string {
+  // 한글을 영문으로 변환하는 간단한 방식 - 타임스탬프 기반 slug
+  const timestamp = Date.now();
+  const sanitized = keyword
+    .replace(/[^\w\s가-힣]/g, "")
+    .replace(/\s+/g, "-")
+    .toLowerCase();
+  return `${sanitized}-${timestamp}`;
+}
+
+export const dreamApi = {
+  async getAll() {
+    const { data, error } = await supabase
+      .from("dreams")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("dreamApi getAll error:", error);
+      throw error;
+    }
+    return (data || []) as Dream[];
+  },
+
+  async getById(id: string) {
+    const { data, error } = await supabase
+      .from("dreams")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) {
+      console.error("dreamApi getById error:", error);
+      throw error;
+    }
+    return data as Dream;
+  },
+
+  async create(formData: DreamFormData) {
+    const slug = formData.slug || generateSlug(formData.keyword);
+    const insertData: Record<string, unknown> = {
+      keyword: formData.keyword,
+      slug,
+      interpretation: formData.interpretation,
+      traditional_meaning: formData.traditional_meaning || null,
+      psychological_meaning: formData.psychological_meaning || null,
+      category: formData.category || "other",
+      grade: formData.grade || "good",
+      score: formData.score ?? 70,
+      meta_title: formData.meta_title || null,
+      meta_description: formData.meta_description || null,
+      published: formData.published || false,
+      published_at: formData.published ? new Date().toISOString() : null,
+    };
+    const { data, error } = await supabase
+      .from("dreams")
+      .insert([insertData])
+      .select()
+      .single();
+    if (error) {
+      console.error("dreamApi create error:", error);
+      throw error;
+    }
+    return data as Dream;
+  },
+
+  async update(id: string, formData: Partial<DreamFormData>) {
+    const updateData: Record<string, unknown> = {};
+    if (formData.keyword !== undefined) updateData.keyword = formData.keyword;
+    if (formData.slug !== undefined) updateData.slug = formData.slug;
+    if (formData.interpretation !== undefined) updateData.interpretation = formData.interpretation;
+    if (formData.traditional_meaning !== undefined) updateData.traditional_meaning = formData.traditional_meaning || null;
+    if (formData.psychological_meaning !== undefined) updateData.psychological_meaning = formData.psychological_meaning || null;
+    if (formData.category !== undefined) updateData.category = formData.category;
+    if (formData.grade !== undefined) updateData.grade = formData.grade;
+    if (formData.score !== undefined) updateData.score = formData.score;
+    if (formData.meta_title !== undefined) updateData.meta_title = formData.meta_title || null;
+    if (formData.meta_description !== undefined) updateData.meta_description = formData.meta_description || null;
+    if (formData.published !== undefined) {
+      updateData.published = formData.published;
+      if (formData.published) updateData.published_at = new Date().toISOString();
+    }
+    updateData.updated_at = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("dreams")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      console.error("dreamApi update error:", error);
+      throw error;
+    }
+    return data as Dream;
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase.from("dreams").delete().eq("id", id);
+    if (error) {
+      console.error("dreamApi delete error:", error);
+      throw error;
+    }
+  },
+};
+
+// =====================================================
 // Featured Columns API (메인화면 추천 칼럼)
 // =====================================================
 export interface FeaturedColumn {

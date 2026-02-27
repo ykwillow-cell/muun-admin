@@ -2,4 +2,4 @@
 // All data operations now use Supabase directly
 // Import from ./supabase.ts instead
 
-export { supabase, columnApi, columnDataApi } from "./supabase";
+export { supabase, columnApi } from "./supabase";
