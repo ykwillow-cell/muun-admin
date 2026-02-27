@@ -8,13 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Loader2,
   ArrowLeft,
@@ -488,24 +482,25 @@ export default function ColumnEditor() {
                 {activeTab === "settings" && (
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium text-slate-700 mb-1 block">
+                      <Label className="text-sm font-medium text-slate-700 mb-3 block">
                         카테고리
                       </Label>
-                      <Select
-                        value={form.category}
-                        onValueChange={(v) => set("category", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="카테고리 선택" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CATEGORY_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex flex-wrap gap-2">
+                        {CATEGORY_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => set("category", opt.value)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                              form.category === opt.value
+                                ? "bg-slate-900 text-white border-slate-900"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-slate-700 mb-1 block">

@@ -8,13 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Loader2,
   ArrowLeft,
@@ -46,11 +40,12 @@ export default function DreamEditor() {
     psychological_meaning: "",
     category: "other",
     grade: "good",
-    score: 70,
+    score: 0,
     meta_title: "",
     meta_description: "",
     published: false,
   });
+  const [scoreInput, setScoreInput] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -61,6 +56,7 @@ export default function DreamEditor() {
 
   useEffect(() => {
     if (dream) {
+      const s = dream.score ?? 0;
       setForm({
         keyword: dream.keyword || "",
         slug: dream.slug || "",
@@ -69,11 +65,12 @@ export default function DreamEditor() {
         psychological_meaning: dream.psychological_meaning || "",
         category: dream.category || "other",
         grade: dream.grade || "good",
-        score: dream.score ?? 70,
+        score: s,
         meta_title: dream.meta_title || "",
         meta_description: dream.meta_description || "",
         published: dream.published || false,
       });
+      setScoreInput(s > 0 ? String(s) : "");
       setSlugManuallyEdited(true);
     }
   }, [dream]);
@@ -383,49 +380,67 @@ export default function DreamEditor() {
                 <CardHeader>
                   <CardTitle className="text-base">꿈해몽 설정</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
+                  {/* 카테고리 태그 선택 */}
                   <div>
-                    <Label className="text-sm font-medium text-slate-700 mb-1 block">
+                    <Label className="text-sm font-medium text-slate-700 mb-3 block">
                       카테고리
                     </Label>
-                    <Select
-                      value={form.category}
-                      onValueChange={(v) => set("category", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DREAM_CATEGORY_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex flex-wrap gap-2">
+                      {DREAM_CATEGORY_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => set("category", opt.value)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                            form.category === opt.value
+                              ? "bg-slate-900 text-white border-slate-900"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* 꿈 등급 태그 선택 */}
                   <div>
-                    <Label className="text-sm font-medium text-slate-700 mb-1 block">
+                    <Label className="text-sm font-medium text-slate-700 mb-3 block">
                       꿈 등급
                     </Label>
-                    <Select
-                      value={form.grade}
-                      onValueChange={(v) => set("grade", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DREAM_GRADE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
+                    <div className="flex flex-wrap gap-2">
+                      {DREAM_GRADE_OPTIONS.map((opt) => {
+                        const gradeStyle =
+                          opt.value === "great"
+                            ? form.grade === opt.value
+                              ? "bg-yellow-500 text-white border-yellow-500"
+                              : "bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+                            : opt.value === "bad"
+                            ? form.grade === opt.value
+                              ? "bg-red-500 text-white border-red-500"
+                              : "bg-white text-red-700 border-red-300 hover:bg-red-50"
+                            : form.grade === opt.value
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50";
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => set("grade", opt.value)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${gradeStyle}`}
+                          >
+                            {opt.value === "great" ? "🌟 " : opt.value === "bad" ? "⚠️ " : "✅ "}
                             {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {/* 운세 점수 */}
                   <div>
-                    <Label className="text-sm font-medium text-slate-700 mb-1 block">
+                    <Label className="text-sm font-medium text-slate-700 mb-3 block">
                       운세 점수 (0~100)
                     </Label>
                     <div className="flex items-center gap-3">
@@ -433,9 +448,15 @@ export default function DreamEditor() {
                         type="number"
                         min={0}
                         max={100}
-                        value={form.score}
-                        onChange={(e) => set("score", parseInt(e.target.value) || 70)}
-                        className="w-24"
+                        value={scoreInput}
+                        placeholder="점수 입력"
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          setScoreInput(raw);
+                          const n = parseInt(raw);
+                          set("score", isNaN(n) ? 0 : Math.min(100, Math.max(0, n)));
+                        }}
+                        className="w-28"
                       />
                       <div className="flex-1 bg-slate-200 rounded-full h-2">
                         <div
@@ -444,14 +465,18 @@ export default function DreamEditor() {
                               ? "bg-yellow-500"
                               : form.score >= 50
                               ? "bg-blue-500"
-                              : "bg-red-400"
+                              : form.score > 0
+                              ? "bg-red-400"
+                              : ""
                           }`}
                           style={{ width: `${form.score}%` }}
                         />
                       </div>
-                      <span className="text-sm font-medium text-slate-700 w-10">
-                        {form.score}점
-                      </span>
+                      {scoreInput !== "" && (
+                        <span className="text-sm font-medium text-slate-700 w-12">
+                          {form.score}점
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-400 mt-1">
                       80점 이상: 길몽 / 50~79점: 보통 / 49점 이하: 흉몽
