@@ -593,81 +593,71 @@ export interface SimilarDream {
 }
 
 /**
- * OpenAI text-embedding-3-small 모델로 텍스트 임베딩 생성
+ * 문자열 정규화: 공백 제거, 소문자 변환, 특수문자 제거
  */
-export async function getEmbedding(text: string): Promise<number[]> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!apiKey) throw new Error("VITE_OPENAI_API_KEY가 설정되지 않았습니다.");
-
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "text-embedding-3-small",
-      input: text,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(`OpenAI API 오류: ${err.error?.message || response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.data[0].embedding as number[];
+function normalizeKeyword(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[\s\-_·•]/g, "") // 공백, 하이픈, 언더스코어, 중점 제거
+    .replace(/[^가-힣a-z0-9]/g, ""); // 한글, 영문, 숫자만 남김
 }
 
 /**
- * 코사인 유사도 계산 (0~1, 1에 가까울수록 유사)
+ * Levenshtein 편집 거리 계산
  */
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dot = 0, normA = 0, normB = 0;
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
   }
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  return dp[m][n];
+}
+
+/**
+ * 두 문자열의 유사도를 0~1 사이 값으로 반환 (1 = 완전 동일)
+ * Levenshtein 거리 기반 + 정규화된 문자열 비교
+ */
+export function stringSimilarity(a: string, b: string): number {
+  const na = normalizeKeyword(a);
+  const nb = normalizeKeyword(b);
+  if (na === nb) return 1.0;
+  if (na.length === 0 || nb.length === 0) return 0.0;
+  const maxLen = Math.max(na.length, nb.length);
+  const dist = levenshteinDistance(na, nb);
+  return 1 - dist / maxLen;
 }
 
 /**
  * 새 키워드와 기존 꿈해몽 목록의 유사도를 검사하여
- * 90% 이상 유사한 항목을 반환
+ * 90% 이상 유사한 항목을 반환 (Levenshtein 문자열 유사도 기반)
  */
 export async function checkDreamSimilarity(
   keyword: string,
   excludeId?: string
 ): Promise<SimilarDream[]> {
-  // 1. 새 키워드의 임베딩 생성
-  const newEmbedding = await getEmbedding(keyword);
-
-  // 2. 기존 꿈해몽 목록 조회 (embedding 포함)
+  // 1. 기존 꿈해몽 목록 전체 조회 (keyword, slug만)
   const { data, error } = await supabase
     .from("dreams")
-    .select("id, keyword, slug, embedding")
-    .not("embedding", "is", null);
+    .select("id, keyword, slug");
 
   if (error) throw error;
   if (!data || data.length === 0) return [];
 
-  // 3. 유사도 계산 및 90% 이상 필터링
+  // 2. 유사도 계산 및 90% 이상 필터링
   const results: SimilarDream[] = [];
   for (const dream of data) {
     if (excludeId && dream.id === excludeId) continue;
-    if (!dream.embedding) continue;
-
-    // Supabase에서 vector는 문자열 또는 배열로 반환될 수 있음
-    let embeddingArr: number[];
-    if (typeof dream.embedding === "string") {
-      embeddingArr = JSON.parse(dream.embedding);
-    } else {
-      embeddingArr = dream.embedding as number[];
-    }
-
-    const similarity = cosineSimilarity(newEmbedding, embeddingArr);
+    const similarity = stringSimilarity(keyword, dream.keyword);
     if (similarity >= 0.9) {
       results.push({
         id: dream.id,
@@ -680,20 +670,4 @@ export async function checkDreamSimilarity(
 
   // 유사도 내림차순 정렬
   return results.sort((a, b) => b.similarity - a.similarity);
-}
-
-/**
- * 꿈해몽 저장 후 해당 항목의 embedding을 업데이트
- */
-export async function updateDreamEmbedding(id: string, keyword: string): Promise<void> {
-  try {
-    const embedding = await getEmbedding(keyword);
-    const { error } = await supabase
-      .from("dreams")
-      .update({ embedding: JSON.stringify(embedding) })
-      .eq("id", id);
-    if (error) console.error("embedding 업데이트 오류:", error);
-  } catch (err) {
-    console.error("임베딩 생성 오류:", err);
-  }
 }

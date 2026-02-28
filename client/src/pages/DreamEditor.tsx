@@ -35,7 +35,6 @@ import {
   type DreamFormData,
   type SimilarDream,
   checkDreamSimilarity,
-  updateDreamEmbedding,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -122,8 +121,6 @@ export default function DreamEditor() {
         savedId = created.id;
         toast.success("꿈해몽이 저장되었습니다.");
       }
-      // 저장 후 백그라운드에서 embedding 업데이트
-      updateDreamEmbedding(savedId, form.keyword).catch(console.error);
       setLocation("/dreams");
     } catch (err) {
       console.error("Save failed:", err);
@@ -146,13 +143,6 @@ export default function DreamEditor() {
       return;
     }
 
-    // OpenAI API 키가 없으면 유사도 검사 없이 바로 저장
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      await executeSave(publishNow);
-      return;
-    }
-
     setIsCheckingSimilarity(true);
     try {
       const similar = await checkDreamSimilarity(form.keyword, isEditMode ? dreamId : undefined);
@@ -167,8 +157,7 @@ export default function DreamEditor() {
       }
     } catch (err) {
       console.error("유사도 검사 오류:", err);
-      // 유사도 검사 실패 시 경고 없이 저장 진행
-      toast.warning("유사도 검사를 건너뛰고 저장합니다.");
+      toast.warning("유사도 검사 중 오류가 발생했습니다. 저장을 계속합니다.");
       await executeSave(publishNow);
     } finally {
       setIsCheckingSimilarity(false);
