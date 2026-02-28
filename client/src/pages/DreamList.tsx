@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Edit2, Trash2, Plus, Search, Eye } from "lucide-react";
+import { Edit2, Trash2, Plus, Search, Eye, ArrowUpAZ, CalendarDays } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDreamsList, useDeleteDream } from "@/lib/queries";
 import { DREAM_CATEGORY_OPTIONS, DREAM_GRADE_OPTIONS } from "@/lib/supabase";
@@ -22,20 +22,29 @@ export default function DreamList() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"date" | "keyword">("date");
 
   const { data: dreams = [], isLoading } = useDreamsList();
   const deleteDreamMutation = useDeleteDream();
 
-  const filteredDreams = dreams.filter((d: any) => {
-    const matchSearch = d.keyword.toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "published" && d.published) ||
-      (filterStatus === "draft" && !d.published);
-    const matchCategory =
-      filterCategory === "all" || d.category === filterCategory;
-    return matchSearch && matchStatus && matchCategory;
-  });
+  const filteredDreams = dreams
+    .filter((d: any) => {
+      const matchSearch = d.keyword.toLowerCase().includes(search.toLowerCase());
+      const matchStatus =
+        filterStatus === "all" ||
+        (filterStatus === "published" && d.published) ||
+        (filterStatus === "draft" && !d.published);
+      const matchCategory =
+        filterCategory === "all" || d.category === filterCategory;
+      return matchSearch && matchStatus && matchCategory;
+    })
+    .sort((a: any, b: any) => {
+      if (sortBy === "keyword") {
+        return a.keyword.localeCompare(b.keyword, "ko");
+      }
+      // date: 최신순
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const handleDelete = async (id: string, keyword: string) => {
     if (confirm(`"${keyword}" 꿈해몽을 삭제하시겠습니까?`)) {
@@ -130,6 +139,33 @@ export default function DreamList() {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+          {/* 정렬 토글 버튼 */}
+          <div className="flex gap-1 bg-white border border-slate-200 rounded-md p-1">
+            <button
+              onClick={() => setSortBy("date")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "date"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="최신 작성일순"
+            >
+              <CalendarDays className="w-4 h-4" />
+              최신순
+            </button>
+            <button
+              onClick={() => setSortBy("keyword")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "keyword"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="제목(키워드) 가나다순"
+            >
+              <ArrowUpAZ className="w-4 h-4" />
+              제목순
+            </button>
+          </div>
         </div>
 
         {/* 꿈해몽 목록 */}
