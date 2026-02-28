@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Edit2, Trash2, Plus, Search, BookOpen, ArrowLeft } from "lucide-react";
+import { Edit2, Trash2, Plus, Search, BookOpen, ArrowLeft, ArrowUpAZ, CalendarDays } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDictionaryList, useDeleteDictionary } from "@/lib/queries";
 import { DICTIONARY_CATEGORY_OPTIONS } from "@/lib/supabase";
@@ -22,22 +22,30 @@ export default function DictionaryList() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"date" | "title">("date");
 
   const { data: items = [], isLoading } = useDictionaryList();
   const deleteMutation = useDeleteDictionary();
 
-  const filtered = items.filter((item: any) => {
-    const matchSearch =
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      (item.summary || "").toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "published" && item.published) ||
-      (filterStatus === "draft" && !item.published);
-    const matchCategory =
-      filterCategory === "all" || item.category === filterCategory;
-    return matchSearch && matchStatus && matchCategory;
-  });
+  const filtered = items
+    .filter((item: any) => {
+      const matchSearch =
+        item.title.toLowerCase().includes(search.toLowerCase()) ||
+        (item.summary || "").toLowerCase().includes(search.toLowerCase());
+      const matchStatus =
+        filterStatus === "all" ||
+        (filterStatus === "published" && item.published) ||
+        (filterStatus === "draft" && !item.published);
+      const matchCategory =
+        filterCategory === "all" || item.category === filterCategory;
+      return matchSearch && matchStatus && matchCategory;
+    })
+    .sort((a: any, b: any) => {
+      if (sortBy === "title") {
+        return a.title.localeCompare(b.title, "ko");
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const handleDelete = async (id: string, title: string) => {
     if (confirm(`"${title}" 항목을 삭제하시겠습니까?`)) {
@@ -152,6 +160,33 @@ export default function DictionaryList() {
                     {f.label} ({f.count})
                   </button>
                 ))}
+              </div>
+
+              {/* 정렬 태그 */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-xs text-slate-500 self-center mr-1">정렬:</span>
+                <button
+                  onClick={() => setSortBy("date")}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                    sortBy === "date"
+                      ? "bg-amber-600 text-white border-amber-600"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-amber-400"
+                  }`}
+                >
+                  <CalendarDays className="w-3 h-3" />
+                  최신순
+                </button>
+                <button
+                  onClick={() => setSortBy("title")}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                    sortBy === "title"
+                      ? "bg-amber-600 text-white border-amber-600"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-amber-400"
+                  }`}
+                >
+                  <ArrowUpAZ className="w-3 h-3" />
+                  제목순
+                </button>
               </div>
 
               {/* 카테고리 필터 태그 */}

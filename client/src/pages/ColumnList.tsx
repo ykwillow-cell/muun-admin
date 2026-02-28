@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Edit2, Trash2, Plus, Search, Globe, Eye } from "lucide-react";
+import { Edit2, Trash2, Plus, Search, Globe, Eye, ArrowUpAZ, CalendarDays } from "lucide-react";
 import { useLocation } from "wouter";
 import { useColumnsList, useDeleteColumn } from "@/lib/queries";
 import { CATEGORY_OPTIONS } from "@/lib/supabase";
@@ -21,19 +21,29 @@ export default function ColumnList() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
+  const [sortBy, setSortBy] = useState<"date" | "title">("date");
 
   const { data: columns = [], isLoading } = useColumnsList();
   const deleteColumnMutation = useDeleteColumn();
 
-  const filteredColumns = columns.filter((col: any) => {
-    const title = col.title || col.name || "";
-    const matchSearch = title.toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "published" && col.published) ||
-      (filterStatus === "draft" && !col.published);
-    return matchSearch && matchStatus;
-  });
+  const filteredColumns = columns
+    .filter((col: any) => {
+      const title = col.title || col.name || "";
+      const matchSearch = title.toLowerCase().includes(search.toLowerCase());
+      const matchStatus =
+        filterStatus === "all" ||
+        (filterStatus === "published" && col.published) ||
+        (filterStatus === "draft" && !col.published);
+      return matchSearch && matchStatus;
+    })
+    .sort((a: any, b: any) => {
+      if (sortBy === "title") {
+        const ta = a.title || a.name || "";
+        const tb = b.title || b.name || "";
+        return ta.localeCompare(tb, "ko");
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const handleDelete = async (id: string, title: string) => {
     if (confirm(`"${title}" 칼럼을 삭제하시겠습니까?`)) {
@@ -93,9 +103,9 @@ export default function ColumnList() {
           </button>
         </div>
 
-        {/* 검색 */}
-        <div className="mb-4">
-          <div className="relative">
+        {/* 검색 & 정렬 */}
+        <div className="mb-4 flex gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <Input
               placeholder="칼럼 제목으로 검색..."
@@ -103,6 +113,33 @@ export default function ColumnList() {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
             />
+          </div>
+          {/* 정렬 토글 버튼 */}
+          <div className="flex gap-1 bg-white border border-slate-200 rounded-md p-1">
+            <button
+              onClick={() => setSortBy("date")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "date"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="최신 작성일순"
+            >
+              <CalendarDays className="w-4 h-4" />
+              최신순
+            </button>
+            <button
+              onClick={() => setSortBy("title")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "title"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="제목 가나다순"
+            >
+              <ArrowUpAZ className="w-4 h-4" />
+              제목순
+            </button>
           </div>
         </div>
 
