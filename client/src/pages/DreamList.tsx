@@ -202,12 +202,7 @@ export default function DreamList() {
                     {filteredDreams.map((dream: any) => (
                       <TableRow key={dream.id} className="hover:bg-slate-50">
                         <TableCell>
-                          <div>
-                            <p className="font-medium text-slate-900">{dream.keyword}</p>
-                            <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">
-                              {dream.interpretation?.slice(0, 50)}...
-                            </p>
-                          </div>
+                          <p className="font-medium text-slate-900">{dream.keyword}</p>
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary" className="text-xs">

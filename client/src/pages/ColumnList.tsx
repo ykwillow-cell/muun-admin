@@ -164,6 +164,7 @@ export default function ColumnList() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-16">썸네일</TableHead>
                       <TableHead className="w-[40%]">제목</TableHead>
                       <TableHead>카테고리</TableHead>
                       <TableHead>상태</TableHead>
@@ -177,16 +178,20 @@ export default function ColumnList() {
                       return (
                         <TableRow key={column.id} className="hover:bg-slate-50">
                           <TableCell>
-                            <div>
-                              <p className="font-medium text-slate-900 truncate max-w-xs">
-                                {title}
-                              </p>
-                              {column.description && (
-                                <p className="text-xs text-slate-500 mt-0.5 truncate max-w-xs">
-                                  {column.description}
-                                </p>
-                              )}
-                            </div>
+                            {column.thumbnail_url ? (
+                              <img
+                                src={column.thumbnail_url}
+                                alt={title}
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-slate-100 rounded flex items-center justify-center text-slate-300 text-xs">없음</div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-medium text-slate-900 truncate max-w-xs">
+                              {title}
+                            </p>
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary" className="text-xs">

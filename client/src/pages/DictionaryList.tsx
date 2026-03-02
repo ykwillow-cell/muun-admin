@@ -244,13 +244,7 @@ export default function DictionaryList() {
                   {filtered.map((item: any) => (
                     <TableRow key={item.id} className="hover:bg-slate-50">
                       <TableCell>
-                        <div>
-                          <p className="font-medium text-slate-900">{item.title}</p>
-                          {item.subtitle && (
-                            <p className="text-xs text-slate-400 mt-0.5">{item.subtitle}</p>
-                          )}
-                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{item.summary}</p>
-                        </div>
+                        <p className="font-medium text-slate-900">{item.title}</p>
                       </TableCell>
                       <TableCell>
                         <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-xs border border-amber-200">
