@@ -174,21 +174,85 @@ export const columnApi = {
 // =====================================================
 // Storage API (썸네일 이미지 업로드)
 // =====================================================
+
+/**
+ * Canvas API를 사용하여 이미지를 최적화(압축)합니다.
+ * - 최대 해상도: 1920px (가로 기준)
+ * - 출력 포맷: WebP (지원 시) / JPEG
+ * - 품질: 0.85
+ */
+async function optimizeImage(file: File): Promise<File> {
+  const MAX_WIDTH = 1920;
+  const QUALITY = 0.85;
+  const outputType = 'image/webp';
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      // 원본 비율 유지하며 리사이즈
+      let { width, height } = img;
+      if (width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas 컨텍스트를 생성할 수 없습니다.'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('이미지 변환에 실패했습니다.'));
+            return;
+          }
+          const baseName = file.name.replace(/\.[^.]+$/, '');
+          const optimized = new File([blob], `${baseName}.webp`, { type: outputType });
+          resolve(optimized);
+        },
+        outputType,
+        QUALITY
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('이미지를 불러올 수 없습니다.'));
+    };
+
+    img.src = objectUrl;
+  });
+}
+
 export const storageApi = {
   async uploadThumbnail(file: File): Promise<string> {
-    const MAX_SIZE = 3 * 1024 * 1024; // 3MB
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_SIZE) {
-      throw new Error(`파일 크기가 3MB를 초과합니다. (현재: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      throw new Error(`파일 크기가 10MB를 초과합니다. (현재: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
     }
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       throw new Error('JPG, PNG, GIF, WebP 형식의 이미지만 업로드 가능합니다.');
     }
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    // GIF는 애니메이션 보존을 위해 최적화 건너뜀
+    const optimized = file.type === 'image/gif' ? file : await optimizeImage(file);
+
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
     const { data, error } = await supabase.storage
       .from('column-thumbnails')
-      .upload(fileName, file, { upsert: false, contentType: file.type });
+      .upload(fileName, optimized, { upsert: false, contentType: optimized.type });
     if (error) {
       console.error('Storage upload error:', error);
       throw new Error('이미지 업로드에 실패했습니다.');

@@ -630,13 +630,13 @@ export default function ColumnEditor() {
                     {isUploadingImage ? (
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
-                        <p className="text-xs text-slate-500">업로드 중...</p>
+                        <p className="text-xs text-slate-500">이미지 최적화 및 업로드 중...</p>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2">
                         <Image className="w-8 h-8 text-slate-300" />
                         <p className="text-sm font-medium text-slate-600">클릭하여 이미지 첨부</p>
-                        <p className="text-xs text-slate-400">JPG, PNG, WebP · 최대 3MB</p>
+                        <p className="text-xs text-slate-400">JPG, PNG, WebP · 최대 10MB (자동 최적화)</p>
                       </div>
                     )}
                   </div>
