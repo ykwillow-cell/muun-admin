@@ -27,6 +27,7 @@ import {
   Plus,
   Trash2,
   Zap,
+  Puzzle,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -186,6 +187,7 @@ export default function DesignThemeList() {
                 key={theme.id}
                 theme={theme}
                 onEdit={() => setLocation(`/design/themes/${theme.id}/edit`)}
+                onEditComponents={() => setLocation(`/design/themes/${theme.id}/components`)}
                 onActivate={() => setActivateTarget(theme)}
                 onDuplicate={() => handleDuplicate(theme)}
                 onDelete={() => setDeleteTarget(theme)}
@@ -245,6 +247,7 @@ export default function DesignThemeList() {
 function ThemeCard({
   theme,
   onEdit,
+  onEditComponents,
   onActivate,
   onDuplicate,
   onDelete,
@@ -253,6 +256,7 @@ function ThemeCard({
 }: {
   theme: DesignTheme;
   onEdit: () => void;
+  onEditComponents: () => void;
   onActivate: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -330,7 +334,16 @@ function ThemeCard({
             className="flex-1 gap-1.5"
           >
             <Edit className="h-3.5 w-3.5" />
-            편집
+            색상/폰트
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onEditComponents}
+            className="flex-1 gap-1.5 text-primary border-primary/30 hover:bg-primary/5"
+          >
+            <Puzzle className="h-3.5 w-3.5" />
+            컴포넌트
           </Button>
           {!theme.is_active && (
             <Button

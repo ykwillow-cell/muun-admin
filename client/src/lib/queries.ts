@@ -236,8 +236,8 @@ export function useCreateDesignTheme() {
 export function useUpdateDesignTheme() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, formData }: { id: string; formData: Partial<DesignThemeFormData> }) =>
-      designThemeApi.update(id, formData),
+    mutationFn: ({ id, data }: { id: string; data: Partial<DesignThemeFormData> }) =>
+      designThemeApi.update(id, data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.detail(data.id) });

@@ -159,7 +159,7 @@ export default function DesignThemeEditor() {
     try {
       let savedId: string;
       if (isEdit) {
-        const result = await updateMutation.mutateAsync({ id: params.id, formData: form });
+        const result = await updateMutation.mutateAsync({ id: params.id, data: form });
         savedId = result.id;
         toast.success("테마가 저장되었습니다.");
       } else {

@@ -17,6 +17,7 @@ import DictionaryEditor from "./pages/DictionaryEditor";
 import DesignThemeList from "./pages/DesignThemeList";
 import DesignThemeEditor from "./pages/DesignThemeEditor";
 import DesignTypography from "./pages/DesignTypography";
+import DesignComponentEditor from "./pages/DesignComponentEditor";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path={"/design/themes/new"} component={DesignThemeEditor} />
       <Route path={"/design/themes/:id/edit"} component={DesignThemeEditor} />
       <Route path={"/design/typography"} component={DesignTypography} />
+      <Route path={"/design/themes/:id/components"} component={DesignComponentEditor} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

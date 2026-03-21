@@ -740,6 +740,27 @@ export async function checkDreamSimilarity(
 // Design Theme API (디자인 시스템 관리)
 // =====================================================
 
+// 컴포넌트 토큰 타입 - 컴포넌트별 CSS 변수 맵
+export type ComponentTokenGroup = Record<string, string>;
+export interface ComponentTokens {
+  global?: ComponentTokenGroup;    // 전역 shape/radius
+  button?: ComponentTokenGroup;    // 버튼
+  card?: ComponentTokenGroup;      // 카드
+  input?: ComponentTokenGroup;     // 인풋/텍스트에어리어
+  badge?: ComponentTokenGroup;     // 배지
+  "bottom-nav"?: ComponentTokenGroup; // 바텀 네비게이션
+  gnb?: ComponentTokenGroup;       // GNB 상단 네비게이션
+  dialog?: ComponentTokenGroup;    // 다이얼로그/모달
+  tabs?: ComponentTokenGroup;      // 탭
+  accordion?: ComponentTokenGroup; // 아코디언
+  toast?: ComponentTokenGroup;     // 토스트/알림
+  select?: ComponentTokenGroup;    // 셀렉트/드롭다운
+  avatar?: ComponentTokenGroup;    // 아바타
+  divider?: ComponentTokenGroup;   // 구분선
+  scrollbar?: ComponentTokenGroup; // 스크롤바
+  [key: string]: ComponentTokenGroup | undefined;
+}
+
 export interface DesignTheme {
   id: string;
   name: string;
@@ -748,6 +769,7 @@ export interface DesignTheme {
   colors: Record<string, string>;
   typography: Record<string, string>;
   gradients: Record<string, string>;
+  component_tokens: ComponentTokens;
   created_at: string;
   updated_at: string;
 }
@@ -759,6 +781,7 @@ export interface DesignThemeFormData {
   colors: Record<string, string>;
   typography: Record<string, string>;
   gradients: Record<string, string>;
+  component_tokens: ComponentTokens;
 }
 
 // 무운 사이트의 실제 CSS 변수 목록 (편집 가능한 토큰)
@@ -859,6 +882,7 @@ export const designThemeApi = {
         colors: formData.colors,
         typography: formData.typography,
         gradients: formData.gradients,
+        component_tokens: formData.component_tokens || {},
       }])
       .select()
       .single();
@@ -877,6 +901,7 @@ export const designThemeApi = {
     if (formData.colors !== undefined) updateData.colors = formData.colors;
     if (formData.typography !== undefined) updateData.typography = formData.typography;
     if (formData.gradients !== undefined) updateData.gradients = formData.gradients;
+    if (formData.component_tokens !== undefined) updateData.component_tokens = formData.component_tokens;
 
     const { data, error } = await supabase
       .from("design_themes")
@@ -915,6 +940,7 @@ export const designThemeApi = {
         colors: original.colors,
         typography: original.typography,
         gradients: original.gradients,
+        component_tokens: original.component_tokens || {},
       }])
       .select()
       .single();
@@ -933,3 +959,217 @@ export const designThemeApi = {
     }
   },
 };
+
+// =====================================================
+// 컴포넌트 토큰 정의 - 어드민 편집기에서 사용
+// =====================================================
+export interface ComponentTokenDef {
+  key: string;
+  label: string;
+  type: "size" | "color" | "shadow" | "font-size" | "font-weight" | "number" | "text";
+  unit?: string;      // px, rem, % 등
+  min?: number;
+  max?: number;
+  description?: string;
+}
+
+export interface ComponentSection {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;       // lucide 아이콘 이름
+  tokens: ComponentTokenDef[];
+}
+
+export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
+  {
+    id: "global",
+    label: "전역 Shape",
+    description: "사이트 전체에 적용되는 모서리 둥글기(radius) 기준값",
+    icon: "Shapes",
+    tokens: [
+      { key: "--radius", label: "기본 Radius", type: "size", unit: "rem", description: "카드, 버튼 등 기본 모서리 반경" },
+      { key: "--radius-sm", label: "Small Radius", type: "size", unit: "rem" },
+      { key: "--radius-md", label: "Medium Radius", type: "size", unit: "rem" },
+      { key: "--radius-lg", label: "Large Radius", type: "size", unit: "rem" },
+      { key: "--radius-xl", label: "XLarge Radius", type: "size", unit: "rem" },
+      { key: "--radius-full", label: "Full Radius (pill)", type: "size", unit: "px" },
+    ],
+  },
+  {
+    id: "button",
+    label: "버튼",
+    description: "버튼 컴포넌트의 크기, 패딩, 모서리, 폰트 설정",
+    icon: "MousePointerClick",
+    tokens: [
+      { key: "--btn-height-xs", label: "높이 XS", type: "size", unit: "px", min: 20, max: 60 },
+      { key: "--btn-height-sm", label: "높이 SM", type: "size", unit: "px", min: 20, max: 60 },
+      { key: "--btn-height-md", label: "높이 MD", type: "size", unit: "px", min: 24, max: 80 },
+      { key: "--btn-height-lg", label: "높이 LG", type: "size", unit: "px", min: 32, max: 80 },
+      { key: "--btn-height-xl", label: "높이 XL", type: "size", unit: "px", min: 40, max: 100 },
+      { key: "--btn-padding-x-sm", label: "가로 패딩 SM", type: "size", unit: "px", min: 4, max: 40 },
+      { key: "--btn-padding-x-md", label: "가로 패딩 MD", type: "size", unit: "px", min: 4, max: 40 },
+      { key: "--btn-padding-x-lg", label: "가로 패딩 LG", type: "size", unit: "px", min: 4, max: 48 },
+      { key: "--btn-radius-sm", label: "Radius SM", type: "size", unit: "px", min: 0, max: 24 },
+      { key: "--btn-radius-md", label: "Radius MD", type: "size", unit: "px", min: 0, max: 24 },
+      { key: "--btn-radius-lg", label: "Radius LG", type: "size", unit: "px", min: 0, max: 24 },
+      { key: "--btn-font-size-sm", label: "폰트 크기 SM", type: "font-size", unit: "px", min: 10, max: 20 },
+      { key: "--btn-font-size-md", label: "폰트 크기 MD", type: "font-size", unit: "px", min: 10, max: 24 },
+      { key: "--btn-font-size-lg", label: "폰트 크기 LG", type: "font-size", unit: "px", min: 12, max: 28 },
+      { key: "--btn-font-weight", label: "폰트 굵기", type: "font-weight", description: "100~900 사이 값" },
+      { key: "--btn-gap-md", label: "아이콘 간격", type: "size", unit: "px", min: 0, max: 16 },
+    ],
+  },
+  {
+    id: "card",
+    label: "카드",
+    description: "카드 컴포넌트의 모서리, 패딩, 테두리, 그림자 설정",
+    icon: "LayoutDashboard",
+    tokens: [
+      { key: "--card-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 32 },
+      { key: "--card-padding", label: "기본 패딩", type: "size", unit: "px", min: 8, max: 48 },
+      { key: "--card-padding-sm", label: "Small 패딩", type: "size", unit: "px", min: 8, max: 40 },
+      { key: "--card-padding-lg", label: "Large 패딩", type: "size", unit: "px", min: 12, max: 56 },
+      { key: "--card-border-width", label: "테두리 두께", type: "size", unit: "px", min: 0, max: 4 },
+      { key: "--card-shadow", label: "기본 그림자", type: "shadow", description: "CSS box-shadow 값" },
+      { key: "--card-shadow-hover", label: "호버 그림자", type: "shadow", description: "호버 시 box-shadow 값" },
+      { key: "--card-gap", label: "내부 간격", type: "size", unit: "px", min: 0, max: 32 },
+    ],
+  },
+  {
+    id: "input",
+    label: "인풋 / 텍스트에어리어",
+    description: "입력 필드의 높이, 패딩, 모서리, 테두리 설정",
+    icon: "TextCursorInput",
+    tokens: [
+      { key: "--input-height-sm", label: "높이 SM", type: "size", unit: "px", min: 24, max: 56 },
+      { key: "--input-height-md", label: "높이 MD", type: "size", unit: "px", min: 28, max: 64 },
+      { key: "--input-height-lg", label: "높이 LG", type: "size", unit: "px", min: 36, max: 72 },
+      { key: "--input-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 4, max: 32 },
+      { key: "--input-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 20 },
+      { key: "--input-border-width", label: "테두리 두께", type: "size", unit: "px", min: 0, max: 4 },
+      { key: "--input-font-size", label: "폰트 크기", type: "font-size", unit: "px", min: 10, max: 20 },
+      { key: "--input-ring-width", label: "포커스 링 두께", type: "size", unit: "px", min: 0, max: 8 },
+      { key: "--input-ring-color", label: "포커스 링 색상", type: "color", description: "rgba() 또는 hex 값" },
+    ],
+  },
+  {
+    id: "badge",
+    label: "배지",
+    description: "배지/태그 컴포넌트의 크기, 모서리, 폰트 설정",
+    icon: "Tag",
+    tokens: [
+      { key: "--badge-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 9999, description: "9999px = 완전한 pill 형태" },
+      { key: "--badge-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 2, max: 20 },
+      { key: "--badge-padding-y", label: "세로 패딩", type: "size", unit: "px", min: 0, max: 12 },
+      { key: "--badge-font-size", label: "폰트 크기", type: "font-size", unit: "px", min: 8, max: 16 },
+      { key: "--badge-font-weight", label: "폰트 굵기", type: "font-weight" },
+      { key: "--badge-border-width", label: "테두리 두께", type: "size", unit: "px", min: 0, max: 4 },
+    ],
+  },
+  {
+    id: "bottom-nav",
+    label: "바텀 네비게이션",
+    description: "하단 탭바의 높이, 배경, 아이콘/레이블 크기, 그림자 설정",
+    icon: "Navigation",
+    tokens: [
+      { key: "--bottom-nav-height", label: "높이", type: "size", unit: "px", min: 40, max: 80 },
+      { key: "--bottom-nav-shadow", label: "그림자", type: "shadow" },
+      { key: "--bottom-nav-icon-size", label: "아이콘 크기", type: "size", unit: "px", min: 16, max: 32 },
+      { key: "--bottom-nav-label-size", label: "레이블 폰트 크기", type: "font-size", unit: "px", min: 8, max: 14 },
+      { key: "--bottom-nav-dot-size", label: "활성 점 크기", type: "size", unit: "px", min: 2, max: 8 },
+    ],
+  },
+  {
+    id: "gnb",
+    label: "GNB (상단 네비게이션)",
+    description: "상단 헤더 바의 높이, 타이틀 크기, 패딩 설정",
+    icon: "PanelTop",
+    tokens: [
+      { key: "--gnb-height", label: "높이", type: "size", unit: "px", min: 40, max: 80 },
+      { key: "--gnb-shadow", label: "그림자", type: "shadow", description: "none 또는 CSS box-shadow 값" },
+      { key: "--gnb-title-size", label: "타이틀 폰트 크기", type: "font-size", unit: "px", min: 12, max: 24 },
+      { key: "--gnb-title-weight", label: "타이틀 폰트 굵기", type: "font-weight" },
+      { key: "--gnb-icon-size", label: "아이콘 크기", type: "size", unit: "px", min: 16, max: 36 },
+      { key: "--gnb-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 8, max: 32 },
+    ],
+  },
+  {
+    id: "dialog",
+    label: "다이얼로그 / 모달",
+    description: "모달 창의 모서리, 패딩, 그림자, 오버레이 설정",
+    icon: "RectangleHorizontal",
+    tokens: [
+      { key: "--dialog-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 32 },
+      { key: "--dialog-padding", label: "패딩", type: "size", unit: "px", min: 12, max: 48 },
+      { key: "--dialog-shadow", label: "그림자", type: "shadow" },
+      { key: "--dialog-overlay-bg", label: "오버레이 배경", type: "color", description: "rgba() 값" },
+      { key: "--dialog-title-size", label: "타이틀 폰트 크기", type: "font-size", unit: "px", min: 14, max: 28 },
+      { key: "--dialog-title-weight", label: "타이틀 폰트 굵기", type: "font-weight" },
+    ],
+  },
+  {
+    id: "tabs",
+    label: "탭",
+    description: "탭 컴포넌트의 배경, 모서리, 크기, 폰트 설정",
+    icon: "Layers",
+    tokens: [
+      { key: "--tabs-list-radius", label: "탭 목록 Radius", type: "size", unit: "px", min: 0, max: 20 },
+      { key: "--tabs-list-padding", label: "탭 목록 패딩", type: "size", unit: "px", min: 0, max: 12 },
+      { key: "--tabs-trigger-radius", label: "탭 버튼 Radius", type: "size", unit: "px", min: 0, max: 16 },
+      { key: "--tabs-trigger-height", label: "탭 버튼 높이", type: "size", unit: "px", min: 24, max: 56 },
+      { key: "--tabs-trigger-padding-x", label: "탭 버튼 가로 패딩", type: "size", unit: "px", min: 4, max: 32 },
+      { key: "--tabs-trigger-font-size", label: "탭 폰트 크기", type: "font-size", unit: "px", min: 10, max: 18 },
+      { key: "--tabs-trigger-font-weight", label: "탭 폰트 굵기", type: "font-weight" },
+      { key: "--tabs-active-shadow", label: "활성 탭 그림자", type: "shadow" },
+    ],
+  },
+  {
+    id: "toast",
+    label: "토스트 / 알림",
+    description: "토스트 알림의 모서리, 패딩, 그림자, 폰트 설정",
+    icon: "Bell",
+    tokens: [
+      { key: "--toast-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 24 },
+      { key: "--toast-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 8, max: 32 },
+      { key: "--toast-padding-y", label: "세로 패딩", type: "size", unit: "px", min: 4, max: 24 },
+      { key: "--toast-shadow", label: "그림자", type: "shadow" },
+      { key: "--toast-font-size", label: "폰트 크기", type: "font-size", unit: "px", min: 10, max: 18 },
+      { key: "--toast-font-weight", label: "폰트 굵기", type: "font-weight" },
+    ],
+  },
+  {
+    id: "select",
+    label: "셀렉트 / 드롭다운",
+    description: "셀렉트 박스의 높이, 모서리, 드롭다운 패널 설정",
+    icon: "ChevronDown",
+    tokens: [
+      { key: "--select-trigger-height", label: "트리거 높이", type: "size", unit: "px", min: 28, max: 64 },
+      { key: "--select-trigger-radius", label: "트리거 Radius", type: "size", unit: "px", min: 0, max: 20 },
+      { key: "--select-trigger-padding-x", label: "트리거 가로 패딩", type: "size", unit: "px", min: 4, max: 24 },
+      { key: "--select-content-radius", label: "드롭다운 Radius", type: "size", unit: "px", min: 0, max: 20 },
+      { key: "--select-content-shadow", label: "드롭다운 그림자", type: "shadow" },
+      { key: "--select-item-height", label: "항목 높이", type: "size", unit: "px", min: 24, max: 56 },
+      { key: "--select-item-font-size", label: "항목 폰트 크기", type: "font-size", unit: "px", min: 10, max: 18 },
+    ],
+  },
+  {
+    id: "avatar",
+    label: "아바타",
+    description: "아바타 이미지의 크기, 모서리, 테두리 설정",
+    icon: "UserCircle",
+    tokens: [
+      { key: "--avatar-size-sm", label: "크기 SM", type: "size", unit: "px", min: 16, max: 48 },
+      { key: "--avatar-size-md", label: "크기 MD", type: "size", unit: "px", min: 24, max: 64 },
+      { key: "--avatar-size-lg", label: "크기 LG", type: "size", unit: "px", min: 32, max: 80 },
+      { key: "--avatar-size-xl", label: "크기 XL", type: "size", unit: "px", min: 40, max: 96 },
+      { key: "--avatar-radius", label: "Radius", type: "size", unit: "px", description: "9999px = 원형" },
+      { key: "--avatar-border-width", label: "테두리 두께", type: "size", unit: "px", min: 0, max: 6 },
+    ],
+  },
+];
+
+// 컴포넌트 섹션 ID로 정의 찾기
+export function getComponentSection(id: string): ComponentSection | undefined {
+  return COMPONENT_TOKEN_DEFINITIONS.find(s => s.id === id);
+}
