@@ -27,6 +27,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ColorPickerPopover } from "@/components/ColorPickerPopover";
+import { GradientPickerPopover } from "@/components/GradientPickerPopover";
 import { toast } from "sonner";
 import { useLocation, useParams } from "wouter";
 
@@ -792,27 +794,17 @@ export default function DesignThemeEditor() {
                                   </div>
                                 )}
                                 <div className="flex gap-2 items-center">
-                                  {isColor && (
-                                    <input
-                                      type="color"
-                                      value={value.startsWith("#") ? value : "#6B5FFF"}
-                                      onChange={e => handleColorChange(token.key, e.target.value)}
-                                      className="h-9 w-9 rounded-md border border-input cursor-pointer p-0.5 bg-transparent"
-                                      title="색상 선택"
-                                    />
-                                  )}
+                                  <ColorPickerPopover
+                                    value={value || "#6B5FFF"}
+                                    onChange={color => handleColorChange(token.key, color)}
+                                    label={token.label}
+                                  />
                                   <Input
                                     value={value}
                                     onChange={e => handleColorChange(token.key, e.target.value)}
                                     placeholder="#000000 또는 rgba(0,0,0,0.5)"
                                     className="flex-1 font-mono text-sm h-9"
                                   />
-                                  {isColor && (
-                                    <div
-                                      className="h-9 w-9 rounded-md border border-border shrink-0 shadow-sm"
-                                      style={{ backgroundColor: value }}
-                                    />
-                                  )}
                                 </div>
                               </div>
                             );
@@ -923,29 +915,18 @@ export default function DesignThemeEditor() {
                                     ))}
                                   </div>
                                 )}
-                                {value && (
-                                  <div
-                                    className="h-12 w-full rounded-lg border border-border shadow-sm"
-                                    style={{ background: value }}
-                                  />
-                                )}
+                                {/* 그라디언트 빌더 팝오버 */}
+                                <GradientPickerPopover
+                                  value={value || "linear-gradient(135deg, #6B5FFF 0%, #60C8D4 100%)"}
+                                  onChange={v => handleGradientChange(token.key, v)}
+                                />
+                                {/* 직접 입력 */}
                                 <Input
                                   value={value}
                                   onChange={e => handleGradientChange(token.key, e.target.value)}
                                   placeholder="linear-gradient(135deg, #6B5FFF 0%, #9c27b0 100%)"
                                   className="font-mono text-sm"
                                 />
-                                <div className="flex gap-1.5 flex-wrap">
-                                  {GRADIENT_PRESETS.map((preset, i) => (
-                                    <button
-                                      key={i}
-                                      onClick={() => handleGradientChange(token.key, preset.value)}
-                                      className="h-6 w-12 rounded border border-border shadow-sm hover:scale-110 transition-transform"
-                                      style={{ background: preset.value }}
-                                      title={preset.name}
-                                    />
-                                  ))}
-                                </div>
                               </div>
                             );
                           })}

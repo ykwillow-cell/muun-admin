@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ColorPickerPopover } from "@/components/ColorPickerPopover";
 
 // ── 아이콘 맵 ──
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -187,14 +188,11 @@ function TokenInput({ def, value, onChange }: TokenInputProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {value.startsWith("#") && (
-            <input
-              type="color"
-              value={value}
-              onChange={(e) => onChange(def.key, e.target.value)}
-              className="w-8 h-8 rounded border border-border cursor-pointer"
-            />
-          )}
+          <ColorPickerPopover
+            value={value || "#6B5FFF"}
+            onChange={color => onChange(def.key, color)}
+            label={def.label}
+          />
           <Input
             value={value}
             onChange={(e) => onChange(def.key, e.target.value)}
