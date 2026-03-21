@@ -27,6 +27,7 @@ export default function Home() {
   const { data: columns = [], isLoading: isLoadingColumns } = useColumnsList();
   const { data: dreams = [], isLoading: isLoadingDreams } = useDreamsList();
   const { data: dictionary = [], isLoading: isLoadingDictionary } = useDictionaryList();
+  const { data: activeTheme } = useActiveDesignTheme();
 
   if (loading) {
     return (
@@ -55,7 +56,6 @@ export default function Home() {
 
   const totalContent = columns.length + dreams.length + dictionary.length;
   const totalPublished = publishedColumns + publishedDreams + publishedDictionary;
-  const { data: activeTheme } = useActiveDesignTheme();
 
   const menus = [
     {
