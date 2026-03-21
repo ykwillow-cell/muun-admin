@@ -109,12 +109,13 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
   return (
     <div
       className="rounded-2xl overflow-hidden border border-border shadow-lg"
-      style={{ width: "100%", maxWidth: 320, margin: "0 auto", fontSize: 12 }}
+      style={{ width: "100%", maxWidth: 320, margin: "0 auto", fontSize: 12, fontFamily: "'Pretendard Variable', Pretendard, sans-serif" }}
     >
       {/* ── GNB ── */}
       <div
         style={{
-          backgroundColor: c("--card", "#ffffff"),
+          backgroundColor: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(12px)",
           borderBottom: `1px solid ${c("--border", "#e8ebed")}`,
           padding: "10px 14px",
           display: "flex",
@@ -122,23 +123,32 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontWeight: 700, fontSize: 15, color: c("--primary", "#6B5FFF") }}>무운</span>
+        <span style={{ fontWeight: 800, fontSize: 15, color: c("--foreground", "#191f28"), letterSpacing: "-0.02em" }}>무운</span>
         <Search size={15} style={{ color: c("--foreground-secondary", "#4e5968") }} />
       </div>
 
-      {/* ── 통계 바 ── */}
+      {/* ── TrustBar (딥 퍼플 하드코딩 — 실제 사이트와 동일) ── */}
       <div
         style={{
-          backgroundColor: c("--foreground", "#191f28"),
+          background: "linear-gradient(155deg, #12082e 0%, #1e0f4a 100%)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
           display: "flex",
-          justifyContent: "space-around",
-          padding: "8px 0",
+          alignItems: "stretch",
+          padding: "8px 14px",
         }}
       >
-        {[["1만+", "누적 이용자"], ["13가지", "무료 서비스"], ["정통 명리학", "사주 이론 기반"]].map(([val, label]) => (
-          <div key={label} style={{ textAlign: "center" }}>
-            <div style={{ color: "#ffffff", fontWeight: 700, fontSize: 11 }}>{val}</div>
-            <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 9 }}>{label}</div>
+        {[["1만+", "누적 이용자"], ["13가지", "무료 서비스"], ["정통 명리학", "사주 이론 기반"]].map(([val, label], i) => (
+          <div
+            key={label}
+            style={{
+              flex: 1,
+              textAlign: "center",
+              borderRight: i < 2 ? "1px solid rgba(255,255,255,0.10)" : "none",
+              padding: "4px 0",
+            }}
+          >
+            <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 11, letterSpacing: "-0.03em", lineHeight: 1.2 }}>{val}</div>
+            <div style={{ color: "rgba(255,255,255,0.40)", fontSize: 8.5, fontWeight: 500, marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -148,9 +158,11 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
         style={{
           background: g("--aurora", "linear-gradient(135deg, #6B5FFF 0%, #60C8D4 60%, #A8E6CF 100%)"),
           padding: "20px 14px 16px",
+          position: "relative",
         }}
       >
-        <div style={{ marginBottom: 6 }}>
+        {/* 배지 */}
+        <div style={{ marginBottom: 8 }}>
           <span
             style={{
               display: "inline-block",
@@ -159,30 +171,42 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
               padding: "2px 8px",
               color: "rgba(255,255,255,0.9)",
               fontSize: 9,
-              marginBottom: 8,
+              fontWeight: 500,
             }}
           >
             ● 정통 명리학 기반 · 100% 무료
           </span>
         </div>
-        <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 18, lineHeight: 1.3, marginBottom: 4 }}>
+        {/* 헤드라인 */}
+        <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 20, lineHeight: 1.25, marginBottom: 5, letterSpacing: "-0.03em" }}>
           생년월일로 보는<br />나의 사주
         </div>
-        <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 10, marginBottom: 14 }}>
+        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 10, marginBottom: 14, fontWeight: 400 }}>
           회원가입 없이 지금 바로 확인하세요
         </div>
 
-        {/* 입력 폼 카드 */}
+        {/* 입력 폼 카드 — 실제 사이트: rgba(255,255,255,0.18) + blur + 28px radius */}
         <div
           style={{
             backgroundColor: "rgba(255,255,255,0.18)",
-            borderRadius: 12,
-            padding: "10px 10px 8px",
-            backdropFilter: "blur(8px)",
+            borderRadius: 22,
+            border: "1px solid rgba(255,255,255,0.28)",
+            padding: "12px 12px 10px",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
           }}
         >
-          {/* 탭 */}
-          <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+          {/* 탭 — 실제: rgba(0,0,0,0.12) 배경 */}
+          <div
+            style={{
+              display: "flex",
+              gap: 3,
+              marginBottom: 8,
+              backgroundColor: "rgba(0,0,0,0.12)",
+              borderRadius: 10,
+              padding: 3,
+            }}
+          >
             <div
               style={{
                 flex: 1,
@@ -190,9 +214,10 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
                 borderRadius: 8,
                 padding: "5px 0",
                 textAlign: "center",
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: 10,
                 color: c("--foreground", "#191f28"),
+                boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
               }}
             >
               ① 생년월일
@@ -200,12 +225,12 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
             <div
               style={{
                 flex: 1,
-                backgroundColor: "transparent",
                 borderRadius: 8,
                 padding: "5px 0",
                 textAlign: "center",
                 fontSize: 10,
-                color: "rgba(255,255,255,0.7)",
+                color: "rgba(255,255,255,0.65)",
+                fontWeight: 500,
               }}
             >
               ② 상세 정보
@@ -214,24 +239,26 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
           {/* 인풋 */}
           <div
             style={{
-              backgroundColor: "rgba(255,255,255,0.25)",
-              borderRadius: 8,
-              padding: "7px 10px",
-              color: "rgba(255,255,255,0.7)",
+              backgroundColor: "rgba(255,255,255,0.22)",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.3)",
+              padding: "8px 10px",
+              color: "rgba(255,255,255,0.65)",
               fontSize: 10,
-              marginBottom: 6,
+              marginBottom: 7,
             }}
           >
             예) 1993. 05. 21
           </div>
-          {/* 버튼 */}
+          {/* 다음 버튼 */}
           <div
             style={{
-              backgroundColor: "rgba(255,255,255,0.25)",
-              borderRadius: 8,
-              padding: "7px 10px",
+              backgroundColor: "rgba(255,255,255,0.22)",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.3)",
+              padding: "8px 10px",
               textAlign: "center",
-              color: "rgba(255,255,255,0.85)",
+              color: "rgba(255,255,255,0.80)",
               fontSize: 10,
               fontWeight: 600,
             }}
@@ -240,17 +267,18 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
           </div>
         </div>
 
-        {/* 배지 */}
-        <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+        {/* 하단 배지 */}
+        <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
           {["✦ 100% 무료", "✦ 회원가입 없음", "✦ 저장 안함"].map(text => (
             <div
               key={text}
               style={{
-                border: "1px solid rgba(255,255,255,0.5)",
+                border: "1px solid rgba(255,255,255,0.45)",
                 borderRadius: 999,
                 padding: "2px 7px",
                 color: "rgba(255,255,255,0.85)",
                 fontSize: 8,
+                fontWeight: 500,
               }}
             >
               {text}
@@ -259,23 +287,89 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
         </div>
       </div>
 
-      {/* ── 콘텐츠 영역 ── */}
-      <div style={{ backgroundColor: c("--background", "#f2f4f6"), padding: "12px 10px", display: "flex", flexDirection: "column", gap: 8 }}>
+      {/* ── MainBanner (흰 배경 + 퍼플 그라디언트 카드) ── */}
+      <div style={{ backgroundColor: "#ffffff", padding: "12px 14px" }}>
+        <div
+          style={{
+            background: "linear-gradient(135deg, #7B61FF 0%, #6A4FE8 100%)",
+            borderRadius: 16,
+            padding: "14px 14px 12px",
+            position: "relative",
+            overflow: "hidden",
+            minHeight: 90,
+          }}
+        >
+          {/* 한자 워터마크 */}
+          <span
+            style={{
+              position: "absolute",
+              right: 8,
+              bottom: -6,
+              fontSize: 40,
+              fontWeight: 900,
+              color: "rgba(255,255,255,0.13)",
+              lineHeight: 1,
+              fontFamily: "'Noto Serif KR', serif",
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          >家{"\n"}運</span>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 13, lineHeight: 1.25, letterSpacing: "-0.03em", marginBottom: 4 }}>
+              가족 오행<br />함께 분석
+            </div>
+            <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 9, marginBottom: 8 }}>
+              가족 구성원 사주 한눈에 비교
+            </div>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "4px 10px",
+                borderRadius: 14,
+                background: "rgba(255,255,255,0.22)",
+                backdropFilter: "blur(4px)",
+                fontSize: 9,
+                fontWeight: 600,
+                color: "#ffffff",
+              }}
+            >
+              가족 사주 보기 →
+            </span>
+          </div>
+        </div>
+        {/* 도트 인디케이터 */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 4, paddingTop: 8 }}>
+          {[0,1,2,3].map(i => (
+            <div
+              key={i}
+              style={{
+                width: i === 0 ? 14 : 4,
+                height: 4,
+                borderRadius: 3,
+                backgroundColor: i === 0 ? c("--primary", "#6B5FFF") : "#d1d5db",
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
-        {/* 섹션 타이틀 */}
-        <div style={{ fontWeight: 700, fontSize: 12, color: c("--foreground", "#191f28") }}>
+      {/* ── 8px 구분선 (실제 사이트 GAP 컴포넌트) ── */}
+      <div style={{ height: 8, backgroundColor: "#f2f4f6" }} />
+
+      {/* ── 칼럼 섹션 (흰 배경) ── */}
+      <div style={{ backgroundColor: "#ffffff", padding: "12px 14px" }}>
+        <div style={{ fontWeight: 700, fontSize: 12, color: c("--foreground", "#191f28"), marginBottom: 8 }}>
           오늘의 추천 칼럼
         </div>
 
-        {/* 카드 1 */}
+        {/* 칼럼 카드 1 */}
         <div
           style={{
-            backgroundColor: c("--card", "#ffffff"),
-            borderRadius: 10,
-            border: `1px solid ${c("--border", "#e8ebed")}`,
-            padding: "10px",
             display: "flex",
             gap: 8,
+            padding: "8px 0",
+            borderBottom: `1px solid ${c("--border", "#e5e8eb")}`,
           }}
         >
           <div
@@ -283,54 +377,50 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
               width: 44,
               height: 44,
               borderRadius: 8,
-              background: g("--gradient-primary", "linear-gradient(135deg, #6B5FFF 0%, #9c27b0 100%)"),
+              background: "linear-gradient(135deg, #7B61FF 0%, #9c27b0 100%)",
               flexShrink: 0,
             }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: c("--foreground", "#191f28"),
-                marginBottom: 2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              2025년 을사년 사주 풀이
-            </div>
-            <div style={{ fontSize: 9, color: c("--foreground-secondary", "#4e5968"), lineHeight: 1.4 }}>
-              새해 운세와 주요 변화를 살펴봅니다
-            </div>
-            <div style={{ marginTop: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
               <span
                 style={{
-                  display: "inline-block",
                   backgroundColor: c("--accent", "rgba(107,95,255,0.08)"),
                   color: c("--accent-foreground", "#6B5FFF"),
                   borderRadius: 999,
-                  padding: "1px 6px",
-                  fontSize: 8,
+                  padding: "1px 5px",
+                  fontSize: 7.5,
                   fontWeight: 600,
                 }}
               >
                 사주
               </span>
             </div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: c("--foreground", "#191f28"),
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                lineHeight: 1.4,
+              }}
+            >
+              2025년 을사년 사주 풀이
+            </div>
+            <div style={{ fontSize: 8.5, color: c("--foreground-secondary", "#8b95a1"), marginTop: 1 }}>
+              새해 운세와 주요 변화를 살펴봅니다
+            </div>
           </div>
         </div>
 
-        {/* 카드 2 */}
+        {/* 칼럼 카드 2 */}
         <div
           style={{
-            backgroundColor: c("--card", "#ffffff"),
-            borderRadius: 10,
-            border: `1px solid ${c("--border", "#e8ebed")}`,
-            padding: "10px",
             display: "flex",
             gap: 8,
+            padding: "8px 0",
           }}
         >
           <div
@@ -338,110 +428,74 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
               width: 44,
               height: 44,
               borderRadius: 8,
-              background: g("--gradient-aurora-2", "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"),
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
               flexShrink: 0,
             }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: c("--foreground", "#191f28"),
-                marginBottom: 2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              꿈에서 뱀을 봤다면?
-            </div>
-            <div style={{ fontSize: 9, color: c("--foreground-secondary", "#4e5968"), lineHeight: 1.4 }}>
-              꿈해몽으로 알아보는 길몽과 흉몽
-            </div>
-            <div style={{ marginTop: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
               <span
                 style={{
-                  display: "inline-block",
                   backgroundColor: "rgba(240,147,251,0.12)",
                   color: "#c026d3",
                   borderRadius: 999,
-                  padding: "1px 6px",
-                  fontSize: 8,
+                  padding: "1px 5px",
+                  fontSize: 7.5,
                   fontWeight: 600,
                 }}
               >
                 꿈해몽
               </span>
             </div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: c("--foreground", "#191f28"),
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                lineHeight: 1.4,
+              }}
+            >
+              꿈에서 뱀을 봤다면?
+            </div>
+            <div style={{ fontSize: 8.5, color: c("--foreground-secondary", "#8b95a1"), marginTop: 1 }}>
+              꿈해몽으로 알아보는 길몽과 흉몽
+            </div>
           </div>
-        </div>
-
-        {/* 주요 버튼 */}
-        <div style={{ display: "flex", gap: 6 }}>
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: c("--primary", "#6B5FFF"),
-              color: c("--primary-foreground", "#ffffff"),
-              borderRadius: 8,
-              padding: "7px 0",
-              textAlign: "center",
-              fontWeight: 600,
-              fontSize: 10,
-            }}
-          >
-            사주 보기
-          </div>
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: c("--secondary", "#f2f4f6"),
-              color: c("--secondary-foreground", "#191f28"),
-              border: `1px solid ${c("--border", "#e8ebed")}`,
-              borderRadius: 8,
-              padding: "7px 0",
-              textAlign: "center",
-              fontWeight: 600,
-              fontSize: 10,
-            }}
-          >
-            꿈해몽
-          </div>
-        </div>
-
-        {/* 힌트 텍스트 */}
-        <div style={{ fontSize: 9, color: c("--muted-foreground", "#8b95a1"), textAlign: "center" }}>
-          플레이스홀더 · 비활성 상태 텍스트 예시
         </div>
       </div>
 
-      {/* ── 바텀 네비게이션 ── */}
+      {/* ── 바텀 네비게이션 (실제 사이트: 흰 배경 + dot 인디케이터) ── */}
       <div
         style={{
-          backgroundColor: c("--card", "#ffffff"),
-          borderTop: `1px solid ${c("--border", "#e8ebed")}`,
+          backgroundColor: "#ffffff",
+          borderTop: `1px solid ${c("--border", "#e5e8eb")}`,
           display: "flex",
           justifyContent: "space-around",
-          padding: "8px 0 10px",
+          padding: "8px 4px 10px",
         }}
       >
         {[
-          { label: "홈", active: true },
-          { label: "칼럼", active: false },
-          { label: "사전", active: false },
-          { label: "MY", active: false },
-        ].map(({ label, active }) => (
-          <div key={label} style={{ textAlign: "center" }}>
+          { label: "홈", icon: "⌂", active: true },
+          { label: "칼럼", icon: "≡", active: false },
+          { label: "사전", icon: "▢", active: false },
+          { label: "MY", icon: "○", active: false },
+        ].map(({ label, icon, active }) => (
+          <div key={label} style={{ textAlign: "center", flex: 1, position: "relative" }}>
+            {/* 아이콘 영역 */}
             <div
               style={{
-                width: 20,
-                height: 20,
-                borderRadius: 6,
-                backgroundColor: active ? c("--primary", "#6B5FFF") : c("--muted", "#f2f4f6"),
-                margin: "0 auto 3px",
+                fontSize: 16,
+                lineHeight: 1,
+                marginBottom: 2,
+                color: active ? c("--primary", "#6B5FFF") : c("--muted-foreground", "#8b95a1"),
               }}
-            />
+            >
+              {icon}
+            </div>
+            {/* 레이블 */}
             <div
               style={{
                 fontSize: 8,
@@ -451,6 +505,18 @@ function MuunPreview({ colors, gradients }: MuunPreviewProps) {
             >
               {label}
             </div>
+            {/* 활성 dot 인디케이터 */}
+            {active && (
+              <div
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  backgroundColor: c("--primary", "#6B5FFF"),
+                  margin: "3px auto 0",
+                }}
+              />
+            )}
           </div>
         ))}
       </div>
