@@ -1,0 +1,32 @@
+name: Create Banners Table
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install psql
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Run migration
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          psql "postgresql://postgres.vuifbmsdggnwygvgcrkj@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres" << 'SQL'
+          CREATE TABLE IF NOT EXISTS public.banners (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            title TEXT NOT NULL,
+            sub TEXT,
+            tag TEXT,
+            cta TEXT NOT NULL DEFAULT '자세히 보기',
+            href TEXT NOT NULL DEFAULT '/',
+            gradient TEXT NOT NULL DEFAULT 'linear-gradient(135deg, #7B61FF 0%, #6A4FE8 100%)',
+            watermark TEXT,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            is_active BOOLEAN NOT NULL DEFAULT true,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
+          );
+          SQL

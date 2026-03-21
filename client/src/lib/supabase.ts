@@ -737,6 +737,140 @@ export async function checkDreamSimilarity(
 }
 
 // =====================================================
+// Banner API (메인 배너 관리)
+// =====================================================
+
+export interface Banner {
+  id: string;
+  title: string;
+  sub: string | null;
+  tag: string | null;
+  cta: string;
+  href: string;
+  gradient: string;
+  watermark: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BannerFormData {
+  title: string;
+  sub: string;
+  tag: string;
+  cta: string;
+  href: string;
+  gradient: string;
+  watermark: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export const bannerApi = {
+  async getAll(): Promise<Banner[]> {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.error("bannerApi.getAll error:", error);
+      throw error;
+    }
+    return (data || []) as Banner[];
+  },
+
+  async getActive(): Promise<Banner[]> {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.error("bannerApi.getActive error:", error);
+      throw error;
+    }
+    return (data || []) as Banner[];
+  },
+
+  async getById(id: string): Promise<Banner> {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) {
+      console.error("bannerApi.getById error:", error);
+      throw error;
+    }
+    return data as Banner;
+  },
+
+  async create(formData: BannerFormData): Promise<Banner> {
+    const { data, error } = await supabase
+      .from("banners")
+      .insert([{
+        title: formData.title,
+        sub: formData.sub || null,
+        tag: formData.tag || null,
+        cta: formData.cta,
+        href: formData.href,
+        gradient: formData.gradient,
+        watermark: formData.watermark || null,
+        sort_order: formData.sort_order,
+        is_active: formData.is_active,
+      }])
+      .select()
+      .single();
+    if (error) {
+      console.error("bannerApi.create error:", error);
+      throw error;
+    }
+    return data as Banner;
+  },
+
+  async update(id: string, formData: Partial<BannerFormData>): Promise<Banner> {
+    const updateData: Record<string, unknown> = {};
+    if (formData.title !== undefined) updateData.title = formData.title;
+    if (formData.sub !== undefined) updateData.sub = formData.sub || null;
+    if (formData.tag !== undefined) updateData.tag = formData.tag || null;
+    if (formData.cta !== undefined) updateData.cta = formData.cta;
+    if (formData.href !== undefined) updateData.href = formData.href;
+    if (formData.gradient !== undefined) updateData.gradient = formData.gradient;
+    if (formData.watermark !== undefined) updateData.watermark = formData.watermark || null;
+    if (formData.sort_order !== undefined) updateData.sort_order = formData.sort_order;
+    if (formData.is_active !== undefined) updateData.is_active = formData.is_active;
+
+    const { data, error } = await supabase
+      .from("banners")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      console.error("bannerApi.update error:", error);
+      throw error;
+    }
+    return data as Banner;
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase.from("banners").delete().eq("id", id);
+    if (error) {
+      console.error("bannerApi.delete error:", error);
+      throw error;
+    }
+  },
+
+  async reorder(items: { id: string; sort_order: number }[]): Promise<void> {
+    const updates = items.map(({ id, sort_order }) =>
+      supabase.from("banners").update({ sort_order }).eq("id", id)
+    );
+    await Promise.all(updates);
+  },
+};
+
+// =====================================================
 // Design Theme API (디자인 시스템 관리)
 // =====================================================
 

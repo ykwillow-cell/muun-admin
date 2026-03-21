@@ -18,6 +18,7 @@ import DesignThemeList from "./pages/DesignThemeList";
 import DesignThemeEditor from "./pages/DesignThemeEditor";
 import DesignTypography from "./pages/DesignTypography";
 import DesignComponentEditor from "./pages/DesignComponentEditor";
+import BannerList from "./pages/BannerList";
 
 function Router() {
   return (
@@ -41,6 +42,8 @@ function Router() {
       <Route path={"/design/themes/:id/edit"} component={DesignThemeEditor} />
       <Route path={"/design/typography"} component={DesignTypography} />
       <Route path={"/design/themes/:id/components"} component={DesignComponentEditor} />
+      {/* 배너 관리 라우트 */}
+      <Route path={"/banners"} component={BannerList} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
