@@ -18,8 +18,10 @@ import {
   ArrowLeft,
   Check,
   Eye,
+  EyeOff,
   Palette,
   Save,
+  Search,
   Sparkles,
   Type,
   Zap,
@@ -71,6 +73,7 @@ const DEFAULT_TYPOGRAPHY: Record<string, string> = {
 };
 
 const DEFAULT_GRADIENTS: Record<string, string> = {
+  "--aurora": "linear-gradient(135deg, #6B5FFF 0%, #60C8D4 60%, #A8E6CF 100%)",
   "--gradient-aurora-1": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   "--gradient-aurora-2": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
   "--gradient-aurora-3": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
@@ -91,6 +94,372 @@ function isColorValue(value: string): boolean {
   return /^#[0-9a-fA-F]{3,8}$/.test(value) || /^rgb/.test(value);
 }
 
+// ─────────────────────────────────────────────────────────────
+// 실제 무운 사이트 UI 미리보기 컴포넌트
+// ─────────────────────────────────────────────────────────────
+interface MuunPreviewProps {
+  colors: Record<string, string>;
+  gradients: Record<string, string>;
+}
+
+function MuunPreview({ colors, gradients }: MuunPreviewProps) {
+  const c = (key: string, fallback: string) => colors[key] || fallback;
+  const g = (key: string, fallback: string) => gradients[key] || fallback;
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden border border-border shadow-lg"
+      style={{ width: "100%", maxWidth: 320, margin: "0 auto", fontSize: 12 }}
+    >
+      {/* ── GNB ── */}
+      <div
+        style={{
+          backgroundColor: c("--card", "#ffffff"),
+          borderBottom: `1px solid ${c("--border", "#e8ebed")}`,
+          padding: "10px 14px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontWeight: 700, fontSize: 15, color: c("--primary", "#6B5FFF") }}>무운</span>
+        <Search size={15} style={{ color: c("--foreground-secondary", "#4e5968") }} />
+      </div>
+
+      {/* ── 통계 바 ── */}
+      <div
+        style={{
+          backgroundColor: c("--foreground", "#191f28"),
+          display: "flex",
+          justifyContent: "space-around",
+          padding: "8px 0",
+        }}
+      >
+        {[["1만+", "누적 이용자"], ["13가지", "무료 서비스"], ["정통 명리학", "사주 이론 기반"]].map(([val, label]) => (
+          <div key={label} style={{ textAlign: "center" }}>
+            <div style={{ color: "#ffffff", fontWeight: 700, fontSize: 11 }}>{val}</div>
+            <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 9 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── 히어로 섹션 ── */}
+      <div
+        style={{
+          background: g("--aurora", "linear-gradient(135deg, #6B5FFF 0%, #60C8D4 60%, #A8E6CF 100%)"),
+          padding: "20px 14px 16px",
+        }}
+      >
+        <div style={{ marginBottom: 6 }}>
+          <span
+            style={{
+              display: "inline-block",
+              border: "1px solid rgba(255,255,255,0.6)",
+              borderRadius: 999,
+              padding: "2px 8px",
+              color: "rgba(255,255,255,0.9)",
+              fontSize: 9,
+              marginBottom: 8,
+            }}
+          >
+            ● 정통 명리학 기반 · 100% 무료
+          </span>
+        </div>
+        <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 18, lineHeight: 1.3, marginBottom: 4 }}>
+          생년월일로 보는<br />나의 사주
+        </div>
+        <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 10, marginBottom: 14 }}>
+          회원가입 없이 지금 바로 확인하세요
+        </div>
+
+        {/* 입력 폼 카드 */}
+        <div
+          style={{
+            backgroundColor: "rgba(255,255,255,0.18)",
+            borderRadius: 12,
+            padding: "10px 10px 8px",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          {/* 탭 */}
+          <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: "#ffffff",
+                borderRadius: 8,
+                padding: "5px 0",
+                textAlign: "center",
+                fontWeight: 600,
+                fontSize: 10,
+                color: c("--foreground", "#191f28"),
+              }}
+            >
+              ① 생년월일
+            </div>
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: "transparent",
+                borderRadius: 8,
+                padding: "5px 0",
+                textAlign: "center",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.7)",
+              }}
+            >
+              ② 상세 정보
+            </div>
+          </div>
+          {/* 인풋 */}
+          <div
+            style={{
+              backgroundColor: "rgba(255,255,255,0.25)",
+              borderRadius: 8,
+              padding: "7px 10px",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 10,
+              marginBottom: 6,
+            }}
+          >
+            예) 1993. 05. 21
+          </div>
+          {/* 버튼 */}
+          <div
+            style={{
+              backgroundColor: "rgba(255,255,255,0.25)",
+              borderRadius: 8,
+              padding: "7px 10px",
+              textAlign: "center",
+              color: "rgba(255,255,255,0.85)",
+              fontSize: 10,
+              fontWeight: 600,
+            }}
+          >
+            다음 단계로 →
+          </div>
+        </div>
+
+        {/* 배지 */}
+        <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+          {["✦ 100% 무료", "✦ 회원가입 없음", "✦ 저장 안함"].map(text => (
+            <div
+              key={text}
+              style={{
+                border: "1px solid rgba(255,255,255,0.5)",
+                borderRadius: 999,
+                padding: "2px 7px",
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 8,
+              }}
+            >
+              {text}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 콘텐츠 영역 ── */}
+      <div style={{ backgroundColor: c("--background", "#f2f4f6"), padding: "12px 10px", display: "flex", flexDirection: "column", gap: 8 }}>
+
+        {/* 섹션 타이틀 */}
+        <div style={{ fontWeight: 700, fontSize: 12, color: c("--foreground", "#191f28") }}>
+          오늘의 추천 칼럼
+        </div>
+
+        {/* 카드 1 */}
+        <div
+          style={{
+            backgroundColor: c("--card", "#ffffff"),
+            borderRadius: 10,
+            border: `1px solid ${c("--border", "#e8ebed")}`,
+            padding: "10px",
+            display: "flex",
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 8,
+              background: g("--gradient-primary", "linear-gradient(135deg, #6B5FFF 0%, #9c27b0 100%)"),
+              flexShrink: 0,
+            }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: c("--foreground", "#191f28"),
+                marginBottom: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              2025년 을사년 사주 풀이
+            </div>
+            <div style={{ fontSize: 9, color: c("--foreground-secondary", "#4e5968"), lineHeight: 1.4 }}>
+              새해 운세와 주요 변화를 살펴봅니다
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: c("--accent", "rgba(107,95,255,0.08)"),
+                  color: c("--accent-foreground", "#6B5FFF"),
+                  borderRadius: 999,
+                  padding: "1px 6px",
+                  fontSize: 8,
+                  fontWeight: 600,
+                }}
+              >
+                사주
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 카드 2 */}
+        <div
+          style={{
+            backgroundColor: c("--card", "#ffffff"),
+            borderRadius: 10,
+            border: `1px solid ${c("--border", "#e8ebed")}`,
+            padding: "10px",
+            display: "flex",
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 8,
+              background: g("--gradient-aurora-2", "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"),
+              flexShrink: 0,
+            }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: c("--foreground", "#191f28"),
+                marginBottom: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              꿈에서 뱀을 봤다면?
+            </div>
+            <div style={{ fontSize: 9, color: c("--foreground-secondary", "#4e5968"), lineHeight: 1.4 }}>
+              꿈해몽으로 알아보는 길몽과 흉몽
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "rgba(240,147,251,0.12)",
+                  color: "#c026d3",
+                  borderRadius: 999,
+                  padding: "1px 6px",
+                  fontSize: 8,
+                  fontWeight: 600,
+                }}
+              >
+                꿈해몽
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 주요 버튼 */}
+        <div style={{ display: "flex", gap: 6 }}>
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: c("--primary", "#6B5FFF"),
+              color: c("--primary-foreground", "#ffffff"),
+              borderRadius: 8,
+              padding: "7px 0",
+              textAlign: "center",
+              fontWeight: 600,
+              fontSize: 10,
+            }}
+          >
+            사주 보기
+          </div>
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: c("--secondary", "#f2f4f6"),
+              color: c("--secondary-foreground", "#191f28"),
+              border: `1px solid ${c("--border", "#e8ebed")}`,
+              borderRadius: 8,
+              padding: "7px 0",
+              textAlign: "center",
+              fontWeight: 600,
+              fontSize: 10,
+            }}
+          >
+            꿈해몽
+          </div>
+        </div>
+
+        {/* 힌트 텍스트 */}
+        <div style={{ fontSize: 9, color: c("--muted-foreground", "#8b95a1"), textAlign: "center" }}>
+          플레이스홀더 · 비활성 상태 텍스트 예시
+        </div>
+      </div>
+
+      {/* ── 바텀 네비게이션 ── */}
+      <div
+        style={{
+          backgroundColor: c("--card", "#ffffff"),
+          borderTop: `1px solid ${c("--border", "#e8ebed")}`,
+          display: "flex",
+          justifyContent: "space-around",
+          padding: "8px 0 10px",
+        }}
+      >
+        {[
+          { label: "홈", active: true },
+          { label: "칼럼", active: false },
+          { label: "사전", active: false },
+          { label: "MY", active: false },
+        ].map(({ label, active }) => (
+          <div key={label} style={{ textAlign: "center" }}>
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 6,
+                backgroundColor: active ? c("--primary", "#6B5FFF") : c("--muted", "#f2f4f6"),
+                margin: "0 auto 3px",
+              }}
+            />
+            <div
+              style={{
+                fontSize: 8,
+                fontWeight: active ? 700 : 400,
+                color: active ? c("--primary", "#6B5FFF") : c("--muted-foreground", "#8b95a1"),
+              }}
+            >
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+
 export default function DesignThemeEditor() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -104,7 +473,7 @@ export default function DesignThemeEditor() {
   const [form, setForm] = useState<DesignThemeFormData>(EMPTY_FORM);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("colors");
-  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(true);
 
   // 기존 테마 데이터 로드
   useEffect(() => {
@@ -119,14 +488,6 @@ export default function DesignThemeEditor() {
       });
     }
   }, [existingTheme]);
-
-  // 미리보기용 CSS 변수 문자열 생성
-  const previewCssVars = useMemo(() => {
-    const allVars = { ...form.colors, ...form.gradients };
-    return Object.entries(allVars)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join("; ");
-  }, [form.colors, form.gradients]);
 
   const handleColorChange = (key: string, value: string) => {
     setForm(prev => ({
@@ -211,9 +572,12 @@ export default function DesignThemeEditor() {
     return acc;
   }, {} as Record<string, typeof DESIGN_TOKEN_DEFINITIONS.gradients>);
 
+  // 색상 탭일 때만 미리보기를 우측에 고정 표시
+  const showSidePreview = previewVisible && activeTab === "colors";
+
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -247,8 +611,8 @@ export default function DesignThemeEditor() {
               onClick={() => setPreviewVisible(!previewVisible)}
               className="gap-1.5"
             >
-              <Eye className="h-4 w-4" />
-              {previewVisible ? "미리보기 닫기" : "미리보기"}
+              {previewVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {previewVisible ? "미리보기 숨기기" : "미리보기"}
             </Button>
             <Button
               variant="outline"
@@ -270,9 +634,11 @@ export default function DesignThemeEditor() {
           </div>
         </div>
 
-        <div className={`grid gap-6 ${previewVisible ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}>
-          {/* 편집 영역 */}
-          <div className={`space-y-6 ${previewVisible ? "lg:col-span-2" : ""}`}>
+        {/* 메인 레이아웃: 편집 영역 + 미리보기 패널 */}
+        <div className={`grid gap-6 items-start ${showSidePreview ? "grid-cols-1 xl:grid-cols-[1fr_340px]" : "grid-cols-1"}`}>
+
+          {/* ── 편집 영역 ── */}
+          <div className="space-y-6">
             {/* 기본 정보 */}
             <Card>
               <CardHeader>
@@ -320,7 +686,7 @@ export default function DesignThemeEditor() {
                     </TabsTrigger>
                   </TabsList>
 
-                  {/* 색상 탭 */}
+                  {/* ── 색상 탭 ── */}
                   <TabsContent value="colors" className="space-y-6">
                     {Object.entries(colorGroups).map(([group, tokens]) => (
                       <div key={group}>
@@ -336,7 +702,6 @@ export default function DesignThemeEditor() {
                             const tokenDef = token as typeof token & { description?: string; usedIn?: string[] };
                             return (
                               <div key={token.key} className="space-y-1.5 p-3 rounded-lg border border-border/50 bg-card hover:border-border transition-colors">
-                                {/* 토큰 헤더: 레이블 + CSS 변수명 */}
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="space-y-0.5 flex-1 min-w-0">
                                     <Label className="text-xs font-semibold text-foreground">{token.label}</Label>
@@ -348,7 +713,6 @@ export default function DesignThemeEditor() {
                                     {token.key}
                                   </code>
                                 </div>
-                                {/* 적용 화면 태그 */}
                                 {tokenDef.usedIn && tokenDef.usedIn.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
                                     {tokenDef.usedIn.map((place: string) => (
@@ -361,18 +725,15 @@ export default function DesignThemeEditor() {
                                     ))}
                                   </div>
                                 )}
-                                {/* 색상 입력 */}
                                 <div className="flex gap-2 items-center">
                                   {isColor && (
-                                    <div className="relative">
-                                      <input
-                                        type="color"
-                                        value={value.startsWith("#") ? value : "#6B5FFF"}
-                                        onChange={e => handleColorChange(token.key, e.target.value)}
-                                        className="h-9 w-9 rounded-md border border-input cursor-pointer p-0.5 bg-transparent"
-                                        title="색상 선택"
-                                      />
-                                    </div>
+                                    <input
+                                      type="color"
+                                      value={value.startsWith("#") ? value : "#6B5FFF"}
+                                      onChange={e => handleColorChange(token.key, e.target.value)}
+                                      className="h-9 w-9 rounded-md border border-input cursor-pointer p-0.5 bg-transparent"
+                                      title="색상 선택"
+                                    />
                                   )}
                                   <Input
                                     value={value}
@@ -395,7 +756,7 @@ export default function DesignThemeEditor() {
                     ))}
                   </TabsContent>
 
-                  {/* 타이포그래피 탭 */}
+                  {/* ── 타이포그래피 탭 ── */}
                   <TabsContent value="typography" className="space-y-6">
                     {Object.entries(typographyGroups).map(([group, tokens]) => (
                       <div key={group}>
@@ -458,7 +819,7 @@ export default function DesignThemeEditor() {
                     ))}
                   </TabsContent>
 
-                  {/* 그라디언트 탭 */}
+                  {/* ── 그라디언트 탭 ── */}
                   <TabsContent value="gradients" className="space-y-6">
                     {Object.entries(gradientGroups).map(([group, tokens]) => (
                       <div key={group}>
@@ -496,7 +857,6 @@ export default function DesignThemeEditor() {
                                     ))}
                                   </div>
                                 )}
-                                {/* 그라디언트 미리보기 */}
                                 {value && (
                                   <div
                                     className="h-12 w-full rounded-lg border border-border shadow-sm"
@@ -509,7 +869,6 @@ export default function DesignThemeEditor() {
                                   placeholder="linear-gradient(135deg, #6B5FFF 0%, #9c27b0 100%)"
                                   className="font-mono text-sm"
                                 />
-                                {/* 빠른 그라디언트 프리셋 */}
                                 <div className="flex gap-1.5 flex-wrap">
                                   {GRADIENT_PRESETS.map((preset, i) => (
                                     <button
@@ -533,147 +892,69 @@ export default function DesignThemeEditor() {
             </Card>
           </div>
 
-          {/* 미리보기 패널 */}
-          {previewVisible && (
-            <div className="lg:col-span-1">
-              <Card className="sticky top-4">
+          {/* ── 실시간 미리보기 패널 (색상 탭에서만 우측 고정) ── */}
+          {showSidePreview && (
+            <div className="xl:sticky xl:top-4 space-y-4">
+              <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    실시간 미리보기
+                    <Eye className="h-4 w-4 text-primary" />
+                    실시간 사이트 미리보기
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    색상 변경이 즉시 반영됩니다
+                    색상을 변경하면 아래 미리보기에 즉시 반영됩니다
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {/* 미리보기 컴포넌트 - 인라인 스타일로 CSS 변수 적용 */}
-                  <div
-                    className="rounded-xl border overflow-hidden text-sm"
-                    style={{
-                      // @ts-expect-error CSS custom properties
-                      ...Object.fromEntries(
-                        Object.entries({ ...form.colors, ...form.gradients }).map(([k, v]) => [k, v])
-                      ),
-                    }}
-                  >
-                    {/* 헤더 영역 */}
-                    <div
-                      className="p-4"
-                      style={{ background: form.gradients["--gradient-aurora-1"] || form.colors["--primary"] }}
-                    >
-                      <div className="text-white font-bold text-base mb-1">무운 (MuUn)</div>
-                      <div className="text-white/80 text-xs">사주 · 운세 · 꿈해몽</div>
-                    </div>
+                <CardContent className="px-3 pb-4">
+                  <MuunPreview colors={form.colors} gradients={form.gradients} />
+                </CardContent>
+              </Card>
 
-                    {/* 본문 영역 */}
-                    <div
-                      className="p-4 space-y-3"
-                      style={{ backgroundColor: form.colors["--background"] || "#f2f4f6" }}
-                    >
-                      {/* 카드 */}
-                      <div
-                        className="rounded-lg p-3 border"
-                        style={{
-                          backgroundColor: form.colors["--card"] || "#ffffff",
-                          borderColor: form.colors["--border"] || "#e8ebed",
-                        }}
-                      >
+              {/* 색상 팔레트 요약 */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs text-muted-foreground">현재 색상 팔레트</CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 pb-3">
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {[
+                      { key: "--primary", label: "Primary" },
+                      { key: "--primary-light", label: "P.Light" },
+                      { key: "--background", label: "BG" },
+                      { key: "--card", label: "Card" },
+                      { key: "--foreground", label: "Text" },
+                      { key: "--foreground-secondary", label: "Text2" },
+                      { key: "--foreground-tertiary", label: "Text3" },
+                      { key: "--border", label: "Border" },
+                      { key: "--muted", label: "Muted" },
+                      { key: "--accent", label: "Accent" },
+                      { key: "--destructive", label: "Error" },
+                      { key: "--ring", label: "Ring" },
+                    ].map(({ key, label }) => (
+                      <div key={key} className="text-center">
                         <div
-                          className="font-semibold text-sm mb-1"
-                          style={{ color: form.colors["--foreground"] || "#191f28" }}
-                        >
-                          오늘의 운세
-                        </div>
-                        <div
-                          className="text-xs"
-                          style={{ color: form.colors["--foreground-secondary"] || "#4e5968" }}
-                        >
-                          당신의 사주를 분석하여 오늘의 운세를 알려드립니다.
-                        </div>
+                          className="h-7 w-full rounded border border-border shadow-sm mb-0.5"
+                          style={{ backgroundColor: form.colors[key] || "#ccc" }}
+                          title={`${key}: ${form.colors[key]}`}
+                        />
+                        <span className="text-[8px] text-muted-foreground leading-none">{label}</span>
                       </div>
-
-                      {/* 버튼 */}
-                      <div className="flex gap-2">
-                        <div
-                          className="flex-1 rounded-lg py-2 text-center text-xs font-medium"
-                          style={{
-                            backgroundColor: form.colors["--primary"] || "#6B5FFF",
-                            color: form.colors["--primary-foreground"] || "#ffffff",
-                          }}
-                        >
-                          사주 보기
-                        </div>
-                        <div
-                          className="flex-1 rounded-lg py-2 text-center text-xs font-medium border"
-                          style={{
-                            backgroundColor: form.colors["--secondary"] || "#f2f4f6",
-                            color: form.colors["--secondary-foreground"] || "#191f28",
-                            borderColor: form.colors["--border"] || "#e8ebed",
-                          }}
-                        >
-                          꿈해몽
-                        </div>
-                      </div>
-
-                      {/* 그라디언트 배너 */}
-                      {form.gradients["--gradient-aurora-2"] && (
-                        <div
-                          className="rounded-lg p-3 text-white text-xs"
-                          style={{ background: form.gradients["--gradient-aurora-2"] }}
-                        >
-                          <div className="font-medium mb-0.5">프리미엄 사주 분석</div>
-                          <div className="opacity-80">더 깊은 운명의 흐름을 읽어드립니다</div>
-                        </div>
-                      )}
-
-                      {/* 색상 팔레트 표시 */}
-                      <div>
-                        <div
-                          className="text-xs mb-1.5"
-                          style={{ color: form.colors["--foreground-tertiary"] || "#8b95a1" }}
-                        >
-                          적용된 색상 토큰
-                        </div>
-                        <div className="flex gap-1 flex-wrap">
-                          {Object.entries(form.colors).slice(0, 8).map(([key, value]) => (
-                            <div
-                              key={key}
-                              className="h-5 w-5 rounded border"
-                              style={{
-                                backgroundColor: value,
-                                borderColor: form.colors["--border"] || "#e8ebed",
-                              }}
-                              title={`${key}: ${value}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 저장 버튼 */}
-                  <div className="mt-4 space-y-2">
-                    <Button
-                      className="w-full gap-1.5"
-                      onClick={() => handleSave(false)}
-                      disabled={isSaving}
-                    >
-                      <Save className="h-4 w-4" />
-                      저장
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-1.5"
-                      onClick={() => handleSave(true)}
-                      disabled={isSaving}
-                    >
-                      <Check className="h-4 w-4" />
-                      저장 후 활성화
-                    </Button>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
+
+              {/* 저장 버튼 */}
+              <div className="space-y-2">
+                <Button className="w-full gap-1.5" onClick={() => handleSave(false)} disabled={isSaving}>
+                  <Save className="h-4 w-4" />
+                  저장
+                </Button>
+                <Button variant="outline" className="w-full gap-1.5" onClick={() => handleSave(true)} disabled={isSaving}>
+                  <Check className="h-4 w-4" />
+                  저장 후 활성화
+                </Button>
+              </div>
             </div>
           )}
         </div>
