@@ -1041,6 +1041,13 @@ export const DESIGN_TOKEN_DEFINITIONS = {
   ],
   gradients: [
     {
+      key: "--aurora",
+      label: "메인 히어로 배경 (Aurora)",
+      group: "히어로",
+      description: "메인 히어로 섹션 전체 배경색입니다. 이 값을 바꾸면 홈 화면 상단 배경이 바뀝니다.",
+      usedIn: ["메인 히어로 섹션 배경", "재방문 히어로 섹션 배경"]
+    },
+    {
       key: "--gradient-aurora-1",
       label: "오로라 그라디언트 1 (퍼플-바이올렛)",
       group: "오로라",
