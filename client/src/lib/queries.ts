@@ -189,3 +189,91 @@ export function useAuth() {
     logout: logoutMutation.mutate,
   };
 }
+
+// =====================================================
+// Design Theme queries
+// =====================================================
+import { designThemeApi, type DesignThemeFormData } from "./supabase";
+
+export const designThemeQueryKeys = {
+  all: ["design_themes"] as const,
+  detail: (id: string) => ["design_themes", id] as const,
+  active: ["design_themes", "active"] as const,
+};
+
+export function useDesignThemeList() {
+  return useQuery({
+    queryKey: designThemeQueryKeys.all,
+    queryFn: () => designThemeApi.getAll(),
+  });
+}
+
+export function useDesignTheme(id: string) {
+  return useQuery({
+    queryKey: designThemeQueryKeys.detail(id),
+    queryFn: () => designThemeApi.getById(id),
+    enabled: !!id,
+  });
+}
+
+export function useActiveDesignTheme() {
+  return useQuery({
+    queryKey: designThemeQueryKeys.active,
+    queryFn: () => designThemeApi.getActive(),
+  });
+}
+
+export function useCreateDesignTheme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (formData: DesignThemeFormData) => designThemeApi.create(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
+    },
+  });
+}
+
+export function useUpdateDesignTheme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: Partial<DesignThemeFormData> }) =>
+      designThemeApi.update(id, formData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.active });
+    },
+  });
+}
+
+export function useActivateDesignTheme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => designThemeApi.activate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.active });
+    },
+  });
+}
+
+export function useDuplicateDesignTheme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => designThemeApi.duplicate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
+    },
+  });
+}
+
+export function useDeleteDesignTheme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => designThemeApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: designThemeQueryKeys.active });
+    },
+  });
+}

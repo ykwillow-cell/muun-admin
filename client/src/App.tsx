@@ -14,9 +14,11 @@ import DreamList from "./pages/DreamList";
 import DreamEditor from "./pages/DreamEditor";
 import DictionaryList from "./pages/DictionaryList";
 import DictionaryEditor from "./pages/DictionaryEditor";
+import DesignThemeList from "./pages/DesignThemeList";
+import DesignThemeEditor from "./pages/DesignThemeEditor";
+import DesignTypography from "./pages/DesignTypography";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/test-db"} component={TestDB} />
@@ -32,6 +34,11 @@ function Router() {
       <Route path={"/dictionary"} component={DictionaryList} />
       <Route path={"/dictionary/new"} component={DictionaryEditor} />
       <Route path={"/dictionary/:id/edit"} component={DictionaryEditor} />
+      {/* 디자인 관리 라우트 */}
+      <Route path={"/design/themes"} component={DesignThemeList} />
+      <Route path={"/design/themes/new"} component={DesignThemeEditor} />
+      <Route path={"/design/themes/:id/edit"} component={DesignThemeEditor} />
+      <Route path={"/design/typography"} component={DesignTypography} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -39,17 +46,11 @@ function Router() {
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
       >
         <TooltipProvider>
           <Toaster />

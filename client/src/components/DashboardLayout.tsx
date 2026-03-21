@@ -10,6 +10,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -21,15 +23,33 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import {
+  BookOpen,
+  LayoutDashboard,
+  LogOut,
+  Moon,
+  PanelLeft,
+  Palette,
+  Sparkles,
+  Star,
+  Type,
+} from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+const contentMenuItems = [
+  { icon: LayoutDashboard, label: "대시보드", path: "/" },
+  { icon: BookOpen, label: "칼럼 관리", path: "/columns" },
+  { icon: Star, label: "추천 칼럼", path: "/featured" },
+  { icon: Moon, label: "꿈해몽 관리", path: "/dreams" },
+  { icon: Sparkles, label: "사주 사전", path: "/dictionary" },
+];
+
+const designMenuItems = [
+  { icon: Palette, label: "테마 관리", path: "/design/themes" },
+  { icon: Type, label: "타이포그래피", path: "/design/typography" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -112,7 +132,8 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
+  const allMenuItems = [...contentMenuItems, ...designMenuItems];
+  const activeMenuItem = allMenuItems.find(item => item.path === location || location.startsWith(item.path + "/"));
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -171,7 +192,7 @@ function DashboardLayoutContent({
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                    무운 어드민
                   </span>
                 </div>
               ) : null}
@@ -179,26 +200,63 @@ function DashboardLayoutContent({
           </SidebarHeader>
 
           <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
-                const isActive = location === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            {/* 콘텐츠 관리 */}
+            <SidebarGroup>
+              {!isCollapsed && (
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-4 py-1">
+                  콘텐츠 관리
+                </SidebarGroupLabel>
+              )}
+              <SidebarMenu className="px-2 py-1">
+                {contentMenuItems.map(item => {
+                  const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        onClick={() => setLocation(item.path)}
+                        tooltip={item.label}
+                        className={`h-10 transition-all font-normal`}
+                      >
+                        <item.icon
+                          className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                        />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
+
+            {/* 디자인 관리 */}
+            <SidebarGroup>
+              {!isCollapsed && (
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-4 py-1">
+                  디자인 관리
+                </SidebarGroupLabel>
+              )}
+              <SidebarMenu className="px-2 py-1">
+                {designMenuItems.map(item => {
+                  const isActive = location === item.path || location.startsWith(item.path);
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        onClick={() => setLocation(item.path)}
+                        tooltip={item.label}
+                        className={`h-10 transition-all font-normal`}
+                      >
+                        <item.icon
+                          className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                        />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
           </SidebarContent>
 
           <SidebarFooter className="p-3">

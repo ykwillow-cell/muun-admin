@@ -13,7 +13,11 @@ import {
   Clock,
   CheckCircle2,
   Edit3,
+  Palette,
+  Type,
+  Zap,
 } from "lucide-react";
+import { useActiveDesignTheme } from "@/lib/queries";
 import { useColumnsList, useDreamsList, useDictionaryList, useAuth } from "@/lib/queries";
 import Login from "./Login";
 
@@ -51,6 +55,7 @@ export default function Home() {
 
   const totalContent = columns.length + dreams.length + dictionary.length;
   const totalPublished = publishedColumns + publishedDreams + publishedDictionary;
+  const { data: activeTheme } = useActiveDesignTheme();
 
   const menus = [
     {
@@ -312,7 +317,7 @@ export default function Home() {
         </div>
 
         {/* 메인 추천 칼럼 바로가기 */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center">
               <Star className="w-5 h-5 text-yellow-500" />
@@ -331,6 +336,54 @@ export default function Home() {
             <TrendingUp className="w-3.5 h-3.5" />
             관리하기
           </Button>
+        </div>
+
+        {/* 디자인 관리 바로가기 */}
+        <div className="bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                <Palette className="w-5 h-5 text-violet-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900 text-sm">디자인 시스템 관리</h3>
+                <p className="text-xs text-slate-500">
+                  현재 활성 테마:{" "}
+                  <span className="font-medium text-violet-700">
+                    {activeTheme ? activeTheme.name : "없음"}
+                  </span>
+                </p>
+              </div>
+            </div>
+            {activeTheme && (
+              <span className="flex items-center gap-1 text-xs text-violet-700 bg-violet-100 px-2 py-1 rounded-full">
+                <Zap className="w-3 h-3" />
+                활성
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setLocation("/design/themes")}
+              className="flex items-center gap-2 bg-white border border-violet-200 rounded-lg px-3 py-2.5 hover:border-violet-400 hover:bg-violet-50 transition-all text-left"
+            >
+              <Palette className="w-4 h-4 text-violet-600 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-800">테마 관리</p>
+                <p className="text-xs text-slate-400">색상 · 그라디언트</p>
+              </div>
+            </button>
+            <button
+              onClick={() => setLocation("/design/typography")}
+              className="flex items-center gap-2 bg-white border border-violet-200 rounded-lg px-3 py-2.5 hover:border-violet-400 hover:bg-violet-50 transition-all text-left"
+            >
+              <Type className="w-4 h-4 text-violet-600 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-800">타이포그래피</p>
+                <p className="text-xs text-slate-400">폰트 · 크기 스케일</p>
+              </div>
+            </button>
+          </div>
         </div>
       </main>
     </div>

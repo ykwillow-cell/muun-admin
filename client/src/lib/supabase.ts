@@ -735,3 +735,201 @@ export async function checkDreamSimilarity(
   // 유사도 내림차순 정렬
   return results.sort((a, b) => b.similarity - a.similarity);
 }
+
+// =====================================================
+// Design Theme API (디자인 시스템 관리)
+// =====================================================
+
+export interface DesignTheme {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  colors: Record<string, string>;
+  typography: Record<string, string>;
+  gradients: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DesignThemeFormData {
+  name: string;
+  description: string;
+  is_active: boolean;
+  colors: Record<string, string>;
+  typography: Record<string, string>;
+  gradients: Record<string, string>;
+}
+
+// 무운 사이트의 실제 CSS 변수 목록 (편집 가능한 토큰)
+export const DESIGN_TOKEN_DEFINITIONS = {
+  colors: [
+    { key: "--background", label: "배경색", group: "기본" },
+    { key: "--foreground", label: "기본 텍스트", group: "기본" },
+    { key: "--foreground-secondary", label: "보조 텍스트", group: "기본" },
+    { key: "--foreground-tertiary", label: "3차 텍스트", group: "기본" },
+    { key: "--card", label: "카드 배경", group: "기본" },
+    { key: "--card-foreground", label: "카드 텍스트", group: "기본" },
+    { key: "--primary", label: "프라이머리", group: "브랜드" },
+    { key: "--primary-foreground", label: "프라이머리 텍스트", group: "브랜드" },
+    { key: "--primary-light", label: "프라이머리 라이트", group: "브랜드" },
+    { key: "--secondary", label: "세컨더리", group: "브랜드" },
+    { key: "--secondary-foreground", label: "세컨더리 텍스트", group: "브랜드" },
+    { key: "--muted", label: "뮤트 배경", group: "UI" },
+    { key: "--muted-foreground", label: "뮤트 텍스트", group: "UI" },
+    { key: "--accent", label: "액센트", group: "UI" },
+    { key: "--accent-foreground", label: "액센트 텍스트", group: "UI" },
+    { key: "--destructive", label: "위험", group: "상태" },
+    { key: "--border", label: "테두리", group: "UI" },
+    { key: "--input", label: "입력 배경", group: "UI" },
+    { key: "--ring", label: "포커스 링", group: "UI" },
+  ],
+  typography: [
+    { key: "--font-display", label: "디스플레이 폰트", group: "폰트 패밀리" },
+    { key: "--font-body", label: "본문 폰트", group: "폰트 패밀리" },
+    { key: "--font-size-display-large", label: "디스플레이 Large", group: "크기" },
+    { key: "--font-size-display-medium", label: "디스플레이 Medium", group: "크기" },
+    { key: "--font-size-display-small", label: "디스플레이 Small", group: "크기" },
+    { key: "--font-size-headline-large", label: "헤드라인 Large", group: "크기" },
+    { key: "--font-size-headline-medium", label: "헤드라인 Medium", group: "크기" },
+    { key: "--font-size-headline-small", label: "헤드라인 Small", group: "크기" },
+    { key: "--font-size-title-large", label: "타이틀 Large", group: "크기" },
+    { key: "--font-size-title-medium", label: "타이틀 Medium", group: "크기" },
+    { key: "--font-size-body-large", label: "본문 Large", group: "크기" },
+    { key: "--font-size-body-medium", label: "본문 Medium", group: "크기" },
+    { key: "--font-size-body-small", label: "본문 Small", group: "크기" },
+    { key: "--font-size-label-large", label: "레이블 Large", group: "크기" },
+    { key: "--font-size-label-medium", label: "레이블 Medium", group: "크기" },
+    { key: "--font-size-label-small", label: "레이블 Small", group: "크기" },
+  ],
+  gradients: [
+    { key: "--gradient-aurora-1", label: "오로라 그라디언트 1", group: "오로라" },
+    { key: "--gradient-aurora-2", label: "오로라 그라디언트 2", group: "오로라" },
+    { key: "--gradient-aurora-3", label: "오로라 그라디언트 3", group: "오로라" },
+    { key: "--gradient-primary", label: "프라이머리 그라디언트", group: "브랜드" },
+  ],
+};
+
+export const designThemeApi = {
+  async getAll(): Promise<DesignTheme[]> {
+    const { data, error } = await supabase
+      .from("design_themes")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("designThemeApi.getAll error:", error);
+      throw error;
+    }
+    return (data || []) as DesignTheme[];
+  },
+
+  async getById(id: string): Promise<DesignTheme> {
+    const { data, error } = await supabase
+      .from("design_themes")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) {
+      console.error("designThemeApi.getById error:", error);
+      throw error;
+    }
+    return data as DesignTheme;
+  },
+
+  async getActive(): Promise<DesignTheme | null> {
+    const { data, error } = await supabase
+      .from("design_themes")
+      .select("*")
+      .eq("is_active", true)
+      .maybeSingle();
+    if (error) {
+      console.error("designThemeApi.getActive error:", error);
+      throw error;
+    }
+    return data as DesignTheme | null;
+  },
+
+  async create(formData: DesignThemeFormData): Promise<DesignTheme> {
+    const { data, error } = await supabase
+      .from("design_themes")
+      .insert([{
+        name: formData.name,
+        description: formData.description || null,
+        is_active: formData.is_active,
+        colors: formData.colors,
+        typography: formData.typography,
+        gradients: formData.gradients,
+      }])
+      .select()
+      .single();
+    if (error) {
+      console.error("designThemeApi.create error:", error);
+      throw error;
+    }
+    return data as DesignTheme;
+  },
+
+  async update(id: string, formData: Partial<DesignThemeFormData>): Promise<DesignTheme> {
+    const updateData: Record<string, unknown> = {};
+    if (formData.name !== undefined) updateData.name = formData.name;
+    if (formData.description !== undefined) updateData.description = formData.description || null;
+    if (formData.is_active !== undefined) updateData.is_active = formData.is_active;
+    if (formData.colors !== undefined) updateData.colors = formData.colors;
+    if (formData.typography !== undefined) updateData.typography = formData.typography;
+    if (formData.gradients !== undefined) updateData.gradients = formData.gradients;
+
+    const { data, error } = await supabase
+      .from("design_themes")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      console.error("designThemeApi.update error:", error);
+      throw error;
+    }
+    return data as DesignTheme;
+  },
+
+  async activate(id: string): Promise<void> {
+    // 모든 테마 비활성화 후 선택한 테마 활성화
+    await supabase.from("design_themes").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
+    const { error } = await supabase
+      .from("design_themes")
+      .update({ is_active: true })
+      .eq("id", id);
+    if (error) {
+      console.error("designThemeApi.activate error:", error);
+      throw error;
+    }
+  },
+
+  async duplicate(id: string): Promise<DesignTheme> {
+    const original = await this.getById(id);
+    const { data, error } = await supabase
+      .from("design_themes")
+      .insert([{
+        name: `${original.name} (복사본)`,
+        description: original.description,
+        is_active: false,
+        colors: original.colors,
+        typography: original.typography,
+        gradients: original.gradients,
+      }])
+      .select()
+      .single();
+    if (error) {
+      console.error("designThemeApi.duplicate error:", error);
+      throw error;
+    }
+    return data as DesignTheme;
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase.from("design_themes").delete().eq("id", id);
+    if (error) {
+      console.error("designThemeApi.delete error:", error);
+      throw error;
+    }
+  },
+};
