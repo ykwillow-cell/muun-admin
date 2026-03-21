@@ -1,10 +1,9 @@
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Card, CardContent } from "@/components/ui/card";
 import {
   FileText,
   Loader2,
-  Star,
   Moon,
   BookOpen,
   Plus,
@@ -16,13 +15,15 @@ import {
   Palette,
   Type,
   Zap,
+  Star,
 } from "lucide-react";
 import { useActiveDesignTheme } from "@/lib/queries";
 import { useColumnsList, useDreamsList, useDictionaryList, useAuth } from "@/lib/queries";
 import Login from "./Login";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function Home() {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { data: columns = [], isLoading: isLoadingColumns } = useColumnsList();
   const { data: dreams = [], isLoading: isLoadingDreams } = useDreamsList();
@@ -118,29 +119,8 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center">
-              <Star className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-none">MUUN Admin</h1>
-              <p className="text-xs text-slate-400 mt-0.5">무운 콘텐츠 관리 시스템</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500 hidden sm:block">{user?.email}</span>
-            <Button onClick={logout} variant="outline" size="sm">
-              로그아웃
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <DashboardLayout>
+      <div className="max-w-5xl mx-auto">
         {/* 전체 요약 배너 */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-6 mb-8 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -385,7 +365,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
