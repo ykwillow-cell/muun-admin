@@ -44,6 +44,7 @@ import {
   ArrowLeft,
   Loader2,
   CheckCircle2,
+  ScrollText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -62,6 +63,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Bell: <Bell size={18} />,
   ChevronDown: <ChevronDown size={18} />,
   UserCircle: <UserCircle size={18} />,
+  ScrollText: <ScrollText size={18} />,
 };
 
 // ── 숫자 파싱 유틸 ──
@@ -689,6 +691,20 @@ const DEFAULT_COMPONENT_TOKENS: ComponentTokens = {
     "--avatar-radius": "9999px",
     "--avatar-border-width": "2px",
     "--avatar-border-color": "var(--card)",
+  },
+  "result-page": {
+    "--result-chart-bg": "rgba(0,0,0,0.04)",
+    "--result-chart-radius": "16px",
+    "--result-summary-bg": "rgba(234,179,8,0.10)",
+    "--result-card-bg": "rgba(0,0,0,0.04)",
+    "--result-card-border": "rgba(0,0,0,0.08)",
+    "--result-icon-bg": "rgba(107,95,255,0.12)",
+    "--result-accent-primary": "var(--primary, #6B5FFF)",
+    "--result-accent-secondary": "rgba(107,95,255,0.60)",
+    "--result-section-title-size": "18px",
+    "--result-section-title-weight": "700",
+    "--result-body-size": "15px",
+    "--result-label-color": "rgba(90,90,86,0.80)",
   },
 };
 

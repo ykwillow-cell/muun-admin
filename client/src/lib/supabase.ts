@@ -892,6 +892,7 @@ export interface ComponentTokens {
   avatar?: ComponentTokenGroup;    // 아바타
   divider?: ComponentTokenGroup;   // 구분선
   scrollbar?: ComponentTokenGroup; // 스크롤바
+  "result-page"?: ComponentTokenGroup; // 운세 결과 페이지
   [key: string]: ComponentTokenGroup | undefined;
 }
 
@@ -1562,6 +1563,27 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
       { key: "--avatar-size-xl", label: "크기 XL", type: "size", unit: "px", min: 40, max: 96 },
       { key: "--avatar-radius", label: "Radius", type: "size", unit: "px", description: "9999px = 원형" },
       { key: "--avatar-border-width", label: "테두리 두께", type: "size", unit: "px", min: 0, max: 6 },
+    ],
+  },
+  {
+    id: "result-page",
+    label: "운세 결과 페이지",
+    description: "사주 분석·신년운세·궁합 등 운세 결과 화면의 색상, 배경, 강조 스타일 설정",
+    icon: "ScrollText",
+    usedIn: ["평생사주 결과", "신년운세 결과", "궁합 결과", "가족사주 결과"],
+    tokens: [
+      { key: "--result-chart-bg", label: "사주 차트 배경", type: "color", description: "사주팔자표 전체 배경색 (rgba 또는 hex)" },
+      { key: "--result-chart-radius", label: "사주 차트 Radius", type: "size", unit: "px", min: 0, max: 32 },
+      { key: "--result-summary-bg", label: "간지 요약 배경", type: "color", description: "사주 하단 간지(干支) 요약 박스 배경색" },
+      { key: "--result-card-bg", label: "결과 카드 배경", type: "color", description: "각 분석 섹션 카드 배경색" },
+      { key: "--result-card-border", label: "결과 카드 테두리", type: "color", description: "결과 카드 테두리 색상 (rgba 또는 hex)" },
+      { key: "--result-icon-bg", label: "섹션 아이콘 배경", type: "color", description: "섹션 제목 옆 아이콘 배경색" },
+      { key: "--result-accent-primary", label: "강조색 (Primary)", type: "color", description: "결과 페이지 주요 강조색 (제목, 아이콘 등)" },
+      { key: "--result-accent-secondary", label: "강조색 (Secondary)", type: "color", description: "보조 강조색" },
+      { key: "--result-section-title-size", label: "섹션 제목 크기", type: "font-size", unit: "px", min: 14, max: 24 },
+      { key: "--result-section-title-weight", label: "섹션 제목 굵기", type: "font-weight" },
+      { key: "--result-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
+      { key: "--result-label-color", label: "레이블 색상", type: "color", description: "보조 텍스트 색상 (설명, 레이블 등)" },
     ],
   },
 ];
