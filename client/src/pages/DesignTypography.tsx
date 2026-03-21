@@ -53,7 +53,7 @@ export default function DesignTypography() {
     try {
       await updateMutation.mutateAsync({
         id: activeTheme.id,
-        formData: { typography },
+        data: { typography },
       });
       toast.success("타이포그래피 설정이 저장되었습니다.");
       setHasChanges(false);
