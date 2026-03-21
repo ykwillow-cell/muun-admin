@@ -333,14 +333,35 @@ export default function DesignThemeEditor() {
                           {tokens.map(token => {
                             const value = form.colors[token.key] || "";
                             const isColor = isColorValue(value);
+                            const tokenDef = token as typeof token & { description?: string; usedIn?: string[] };
                             return (
-                              <div key={token.key} className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs font-medium">{token.label}</Label>
-                                  <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              <div key={token.key} className="space-y-1.5 p-3 rounded-lg border border-border/50 bg-card hover:border-border transition-colors">
+                                {/* 토큰 헤더: 레이블 + CSS 변수명 */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-0.5 flex-1 min-w-0">
+                                    <Label className="text-xs font-semibold text-foreground">{token.label}</Label>
+                                    {tokenDef.description && (
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{tokenDef.description}</p>
+                                    )}
+                                  </div>
+                                  <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0 font-mono">
                                     {token.key}
                                   </code>
                                 </div>
+                                {/* 적용 화면 태그 */}
+                                {tokenDef.usedIn && tokenDef.usedIn.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {tokenDef.usedIn.map((place: string) => (
+                                      <span
+                                        key={place}
+                                        className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium border border-primary/15"
+                                      >
+                                        {place}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                {/* 색상 입력 */}
                                 <div className="flex gap-2 items-center">
                                   {isColor && (
                                     <div className="relative">
@@ -387,14 +408,32 @@ export default function DesignThemeEditor() {
                           {tokens.map(token => {
                             const value = form.typography[token.key] || "";
                             const isFontSize = token.key.includes("font-size");
+                            const tokenDef = token as typeof token & { description?: string; usedIn?: string[] };
                             return (
-                              <div key={token.key} className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs font-medium">{token.label}</Label>
-                                  <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              <div key={token.key} className="space-y-1.5 p-3 rounded-lg border border-border/50 bg-card hover:border-border transition-colors">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-0.5 flex-1 min-w-0">
+                                    <Label className="text-xs font-semibold text-foreground">{token.label}</Label>
+                                    {tokenDef.description && (
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{tokenDef.description}</p>
+                                    )}
+                                  </div>
+                                  <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0 font-mono">
                                     {token.key}
                                   </code>
                                 </div>
+                                {tokenDef.usedIn && tokenDef.usedIn.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {tokenDef.usedIn.map((place: string) => (
+                                      <span
+                                        key={place}
+                                        className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium border border-primary/15"
+                                      >
+                                        {place}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                                 <div className="flex gap-2 items-center">
                                   <Input
                                     value={value}
@@ -431,14 +470,32 @@ export default function DesignThemeEditor() {
                         <div className="space-y-4">
                           {tokens.map(token => {
                             const value = form.gradients[token.key] || "";
+                            const tokenDef = token as typeof token & { description?: string; usedIn?: string[] };
                             return (
-                              <div key={token.key} className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs font-medium">{token.label}</Label>
-                                  <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              <div key={token.key} className="space-y-2 p-3 rounded-lg border border-border/50 bg-card hover:border-border transition-colors">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-0.5 flex-1 min-w-0">
+                                    <Label className="text-xs font-semibold text-foreground">{token.label}</Label>
+                                    {tokenDef.description && (
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{tokenDef.description}</p>
+                                    )}
+                                  </div>
+                                  <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0 font-mono">
                                     {token.key}
                                   </code>
                                 </div>
+                                {tokenDef.usedIn && tokenDef.usedIn.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {tokenDef.usedIn.map((place: string) => (
+                                      <span
+                                        key={place}
+                                        className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium border border-primary/15"
+                                      >
+                                        {place}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                                 {/* 그라디언트 미리보기 */}
                                 {value && (
                                   <div

@@ -787,49 +787,287 @@ export interface DesignThemeFormData {
 // 무운 사이트의 실제 CSS 변수 목록 (편집 가능한 토큰)
 export const DESIGN_TOKEN_DEFINITIONS = {
   colors: [
-    { key: "--background", label: "배경색", group: "기본" },
-    { key: "--foreground", label: "기본 텍스트", group: "기본" },
-    { key: "--foreground-secondary", label: "보조 텍스트", group: "기본" },
-    { key: "--foreground-tertiary", label: "3차 텍스트", group: "기본" },
-    { key: "--card", label: "카드 배경", group: "기본" },
-    { key: "--card-foreground", label: "카드 텍스트", group: "기본" },
-    { key: "--primary", label: "프라이머리", group: "브랜드" },
-    { key: "--primary-foreground", label: "프라이머리 텍스트", group: "브랜드" },
-    { key: "--primary-light", label: "프라이머리 라이트", group: "브랜드" },
-    { key: "--secondary", label: "세컨더리", group: "브랜드" },
-    { key: "--secondary-foreground", label: "세컨더리 텍스트", group: "브랜드" },
-    { key: "--muted", label: "뮤트 배경", group: "UI" },
-    { key: "--muted-foreground", label: "뮤트 텍스트", group: "UI" },
-    { key: "--accent", label: "액센트", group: "UI" },
-    { key: "--accent-foreground", label: "액센트 텍스트", group: "UI" },
-    { key: "--destructive", label: "위험", group: "상태" },
-    { key: "--border", label: "테두리", group: "UI" },
-    { key: "--input", label: "입력 배경", group: "UI" },
-    { key: "--ring", label: "포커스 링", group: "UI" },
+    // 기본
+    {
+      key: "--background",
+      label: "페이지 배경색",
+      group: "기본",
+      description: "사이트 전체 배경. 메인 페이지, 칼럼 목록, 상세 페이지 등 모든 화면의 바탕색입니다.",
+      usedIn: ["메인 페이지", "칼럼 목록", "상세 페이지", "전체 화면"]
+    },
+    {
+      key: "--foreground",
+      label: "기본 텍스트",
+      group: "기본",
+      description: "가장 기본이 되는 텍스트 색상. 제목, 본문, 메뉴 등 대부분의 텍스트에 적용됩니다.",
+      usedIn: ["제목", "본문 텍스트", "메뉴", "전체 화면"]
+    },
+    {
+      key: "--foreground-secondary",
+      label: "보조 텍스트",
+      group: "기본",
+      description: "날짜, 카테고리, 부제목 등 주요 텍스트보다 덜 강조되는 보조 정보에 사용됩니다.",
+      usedIn: ["날짜", "카테고리", "부제목", "칼럼 카드"]
+    },
+    {
+      key: "--foreground-tertiary",
+      label: "3차 텍스트 (힌트)",
+      group: "기본",
+      description: "플레이스홀더, 비활성 상태, 힌트 텍스트 등 가장 약하게 표시되는 텍스트입니다.",
+      usedIn: ["플레이스홀더", "비활성 메뉴", "힌트 텍스트"]
+    },
+    {
+      key: "--card",
+      label: "카드 배경",
+      group: "기본",
+      description: "칼럼 카드, 꿈해몽 카드, 사전 항목 카드 등 콘텐츠 카드의 배경색입니다.",
+      usedIn: ["칼럼 카드", "꿈해몽 카드", "사전 카드", "팝업"]
+    },
+    {
+      key: "--card-foreground",
+      label: "카드 텍스트",
+      group: "기본",
+      description: "카드 내부의 제목, 설명 등 텍스트 색상입니다.",
+      usedIn: ["칼럼 카드 제목", "카드 설명"]
+    },
+    // 브랜드
+    {
+      key: "--primary",
+      label: "브랜드 주색 (퍼플)",
+      group: "브랜드",
+      description: "무운의 핵심 브랜드 색상. 주요 버튼, 활성 탭, 링크, 아이콘 강조에 사용됩니다.",
+      usedIn: ["주요 버튼", "활성 탭", "링크", "GNB 아이콘", "배지"]
+    },
+    {
+      key: "--primary-foreground",
+      label: "브랜드 주색 위 텍스트",
+      group: "브랜드",
+      description: "프라이머리 색상 배경 위에 올라가는 텍스트 색상 (주로 흰색).",
+      usedIn: ["주요 버튼 텍스트", "활성 배지 텍스트"]
+    },
+    {
+      key: "--primary-light",
+      label: "브랜드 주색 밝은 버전",
+      group: "브랜드",
+      description: "호버 상태, 강조 아이콘 등 프라이머리보다 밝은 변형이 필요할 때 사용됩니다.",
+      usedIn: ["버튼 호버", "아이콘 강조"]
+    },
+    {
+      key: "--secondary",
+      label: "보조 배경",
+      group: "브랜드",
+      description: "비활성 버튼, 탭 배경, 칩 배경 등 주색보다 덜 강조되는 UI 요소의 배경색입니다.",
+      usedIn: ["비활성 버튼", "탭 배경", "칩/태그"]
+    },
+    {
+      key: "--secondary-foreground",
+      label: "보조 배경 위 텍스트",
+      group: "브랜드",
+      description: "세컨더리 배경 위에 올라가는 텍스트 색상입니다.",
+      usedIn: ["비활성 버튼 텍스트", "탭 텍스트"]
+    },
+    // UI
+    {
+      key: "--muted",
+      label: "뮤트 배경 (연한 회색)",
+      group: "UI",
+      description: "스켈레톤 로딩, 비활성 영역, 코드 블록 배경 등 눈에 덜 띄는 배경에 사용됩니다.",
+      usedIn: ["스켈레톤 로딩", "코드 블록", "비활성 영역"]
+    },
+    {
+      key: "--muted-foreground",
+      label: "뮤트 텍스트",
+      group: "UI",
+      description: "뮤트 배경 위의 텍스트, 또는 덜 강조되는 설명 텍스트에 사용됩니다.",
+      usedIn: ["설명 텍스트", "메타 정보", "읽기 시간"]
+    },
+    {
+      key: "--accent",
+      label: "액센트 배경 (반투명 퍼플)",
+      group: "UI",
+      description: "선택된 항목, 호버 상태, 강조 영역의 배경색. 주로 반투명 퍼플로 설정됩니다.",
+      usedIn: ["선택된 메뉴", "호버 상태", "강조 카드 배경"]
+    },
+    {
+      key: "--accent-foreground",
+      label: "액센트 배경 위 텍스트",
+      group: "UI",
+      description: "액센트 배경 위에 올라가는 텍스트 색상입니다.",
+      usedIn: ["선택된 메뉴 텍스트", "강조 텍스트"]
+    },
+    {
+      key: "--border",
+      label: "테두리 색상",
+      group: "UI",
+      description: "카드, 인풋, 구분선 등 모든 테두리에 사용되는 색상입니다.",
+      usedIn: ["카드 테두리", "인풋 테두리", "구분선", "전체 화면"]
+    },
+    {
+      key: "--input",
+      label: "입력 필드 배경",
+      group: "UI",
+      description: "검색창, 텍스트 입력 필드의 배경색입니다.",
+      usedIn: ["검색창", "입력 필드"]
+    },
+    {
+      key: "--ring",
+      label: "포커스 링 색상",
+      group: "UI",
+      description: "키보드 포커스 시 나타나는 외곽선 색상. 접근성을 위해 사용됩니다.",
+      usedIn: ["버튼 포커스", "인풋 포커스", "링크 포커스"]
+    },
+    // 상태
+    {
+      key: "--destructive",
+      label: "위험/오류 색상 (빨강)",
+      group: "상태",
+      description: "삭제 버튼, 오류 메시지, 경고 상태 표시에 사용됩니다.",
+      usedIn: ["삭제 버튼", "오류 메시지", "경고 상태"]
+    },
   ],
   typography: [
-    { key: "--font-display", label: "디스플레이 폰트", group: "폰트 패밀리" },
-    { key: "--font-body", label: "본문 폰트", group: "폰트 패밀리" },
-    { key: "--font-size-display-large", label: "디스플레이 Large", group: "크기" },
-    { key: "--font-size-display-medium", label: "디스플레이 Medium", group: "크기" },
-    { key: "--font-size-display-small", label: "디스플레이 Small", group: "크기" },
-    { key: "--font-size-headline-large", label: "헤드라인 Large", group: "크기" },
-    { key: "--font-size-headline-medium", label: "헤드라인 Medium", group: "크기" },
-    { key: "--font-size-headline-small", label: "헤드라인 Small", group: "크기" },
-    { key: "--font-size-title-large", label: "타이틀 Large", group: "크기" },
-    { key: "--font-size-title-medium", label: "타이틀 Medium", group: "크기" },
-    { key: "--font-size-body-large", label: "본문 Large", group: "크기" },
-    { key: "--font-size-body-medium", label: "본문 Medium", group: "크기" },
-    { key: "--font-size-body-small", label: "본문 Small", group: "크기" },
-    { key: "--font-size-label-large", label: "레이블 Large", group: "크기" },
-    { key: "--font-size-label-medium", label: "레이블 Medium", group: "크기" },
-    { key: "--font-size-label-small", label: "레이블 Small", group: "크기" },
+    {
+      key: "--font-display",
+      label: "제목용 폰트 (세리프)",
+      group: "폰트 패밀리",
+      description: "칼럼 제목, 메인 헤드라인 등 강조가 필요한 제목에 사용되는 폰트입니다.",
+      usedIn: ["칼럼 제목", "메인 헤드라인", "사전 항목 제목"]
+    },
+    {
+      key: "--font-body",
+      label: "본문용 폰트 (산세리프)",
+      group: "폰트 패밀리",
+      description: "본문 텍스트, UI 레이블, 버튼 텍스트 등 일반적인 텍스트에 사용되는 폰트입니다.",
+      usedIn: ["본문 텍스트", "버튼", "메뉴", "전체 UI"]
+    },
+    {
+      key: "--font-size-display-large",
+      label: "디스플레이 Large (57px)",
+      group: "크기 스케일",
+      description: "메인 페이지 히어로 영역의 가장 큰 제목에 사용됩니다.",
+      usedIn: ["메인 히어로 제목"]
+    },
+    {
+      key: "--font-size-display-medium",
+      label: "디스플레이 Medium (45px)",
+      group: "크기 스케일",
+      description: "섹션 대표 타이틀, 랜딩 페이지 부제목에 사용됩니다.",
+      usedIn: ["섹션 대표 타이틀"]
+    },
+    {
+      key: "--font-size-display-small",
+      label: "디스플레이 Small (36px)",
+      group: "크기 스케일",
+      description: "페이지 상단 대형 제목에 사용됩니다.",
+      usedIn: ["페이지 대형 제목"]
+    },
+    {
+      key: "--font-size-headline-large",
+      label: "헤드라인 Large (32px)",
+      group: "크기 스케일",
+      description: "칼럼 상세 페이지의 메인 제목에 사용됩니다.",
+      usedIn: ["칼럼 상세 제목"]
+    },
+    {
+      key: "--font-size-headline-medium",
+      label: "헤드라인 Medium (28px)",
+      group: "크기 스케일",
+      description: "섹션 제목, 꿈해몽 상세 제목에 사용됩니다.",
+      usedIn: ["섹션 제목", "꿈해몽 상세 제목"]
+    },
+    {
+      key: "--font-size-headline-small",
+      label: "헤드라인 Small (24px)",
+      group: "크기 스케일",
+      description: "카드 그룹 제목, 사전 항목 제목에 사용됩니다.",
+      usedIn: ["카드 그룹 제목", "사전 항목 제목"]
+    },
+    {
+      key: "--font-size-title-large",
+      label: "타이틀 Large (22px)",
+      group: "크기 스케일",
+      description: "칼럼 카드 제목, 모달 제목에 사용됩니다.",
+      usedIn: ["칼럼 카드 제목", "모달 제목"]
+    },
+    {
+      key: "--font-size-title-medium",
+      label: "타이틀 Medium (16px)",
+      group: "크기 스케일",
+      description: "소형 카드 제목, 리스트 항목 제목에 사용됩니다.",
+      usedIn: ["소형 카드 제목", "리스트 항목"]
+    },
+    {
+      key: "--font-size-body-large",
+      label: "본문 Large (16px)",
+      group: "크기 스케일",
+      description: "칼럼 본문 텍스트, 상세 페이지 설명에 사용됩니다.",
+      usedIn: ["칼럼 본문", "상세 페이지 설명"]
+    },
+    {
+      key: "--font-size-body-medium",
+      label: "본문 Medium (14px)",
+      group: "크기 스케일",
+      description: "일반 UI 텍스트, 카드 설명, 메뉴 항목에 사용됩니다.",
+      usedIn: ["카드 설명", "메뉴 항목", "일반 UI"]
+    },
+    {
+      key: "--font-size-body-small",
+      label: "본문 Small (12px)",
+      group: "크기 스케일",
+      description: "날짜, 읽기 시간, 부가 정보 등 작은 텍스트에 사용됩니다.",
+      usedIn: ["날짜", "읽기 시간", "부가 정보"]
+    },
+    {
+      key: "--font-size-label-large",
+      label: "레이블 Large (14px)",
+      group: "크기 스케일",
+      description: "버튼 텍스트, 탭 레이블, 배지 텍스트에 사용됩니다.",
+      usedIn: ["버튼 텍스트", "탭 레이블", "배지"]
+    },
+    {
+      key: "--font-size-label-medium",
+      label: "레이블 Medium (12px)",
+      group: "크기 스케일",
+      description: "작은 버튼, 칩, 태그 텍스트에 사용됩니다.",
+      usedIn: ["작은 버튼", "칩", "태그"]
+    },
+    {
+      key: "--font-size-label-small",
+      label: "레이블 Small (11px)",
+      group: "크기 스케일",
+      description: "바텀 네비게이션 레이블, 아이콘 아래 텍스트에 사용됩니다.",
+      usedIn: ["바텀 네비 레이블", "아이콘 텍스트"]
+    },
   ],
   gradients: [
-    { key: "--gradient-aurora-1", label: "오로라 그라디언트 1", group: "오로라" },
-    { key: "--gradient-aurora-2", label: "오로라 그라디언트 2", group: "오로라" },
-    { key: "--gradient-aurora-3", label: "오로라 그라디언트 3", group: "오로라" },
-    { key: "--gradient-primary", label: "프라이머리 그라디언트", group: "브랜드" },
+    {
+      key: "--gradient-aurora-1",
+      label: "오로라 그라디언트 1 (퍼플-바이올렛)",
+      group: "오로라",
+      description: "메인 페이지 배경 오로라 효과, 히어로 섹션 장식에 사용됩니다.",
+      usedIn: ["메인 히어로 배경", "오로라 장식"]
+    },
+    {
+      key: "--gradient-aurora-2",
+      label: "오로라 그라디언트 2 (핑크-레드)",
+      group: "오로라",
+      description: "메인 페이지 오로라 효과의 두 번째 레이어에 사용됩니다.",
+      usedIn: ["메인 히어로 배경", "오로라 장식"]
+    },
+    {
+      key: "--gradient-aurora-3",
+      label: "오로라 그라디언트 3 (블루-시안)",
+      group: "오로라",
+      description: "메인 페이지 오로라 효과의 세 번째 레이어에 사용됩니다.",
+      usedIn: ["메인 히어로 배경", "오로라 장식"]
+    },
+    {
+      key: "--gradient-primary",
+      label: "브랜드 그라디언트 (퍼플)",
+      group: "브랜드",
+      description: "CTA 버튼, 배너, 강조 카드 등 브랜드를 강하게 표현할 때 사용됩니다.",
+      usedIn: ["CTA 버튼", "배너", "강조 카드"]
+    },
   ],
 };
 
@@ -978,6 +1216,7 @@ export interface ComponentSection {
   label: string;
   description: string;
   icon: string;       // lucide 아이콘 이름
+  usedIn?: string[];  // 적용 화면/컴포넌트 태그
   tokens: ComponentTokenDef[];
 }
 
@@ -985,8 +1224,9 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
   {
     id: "global",
     label: "전역 Shape",
-    description: "사이트 전체에 적용되는 모서리 둥글기(radius) 기준값",
+    description: "사이트 전체에 적용되는 모서리 둥근기(radius) 기준값",
     icon: "Shapes",
+    usedIn: ["전체 화면", "모든 컴포넌트"],
     tokens: [
       { key: "--radius", label: "기본 Radius", type: "size", unit: "rem", description: "카드, 버튼 등 기본 모서리 반경" },
       { key: "--radius-sm", label: "Small Radius", type: "size", unit: "rem" },
@@ -1001,6 +1241,7 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "버튼",
     description: "버튼 컴포넌트의 크기, 패딩, 모서리, 폰트 설정",
     icon: "MousePointerClick",
+    usedIn: ["사주 분석 시작 버튼", "칼럼 상세 액션", "폼 제출", "모달 확인 버튼"],
     tokens: [
       { key: "--btn-height-xs", label: "높이 XS", type: "size", unit: "px", min: 20, max: 60 },
       { key: "--btn-height-sm", label: "높이 SM", type: "size", unit: "px", min: 20, max: 60 },
@@ -1025,6 +1266,7 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "카드",
     description: "카드 컴포넌트의 모서리, 패딩, 테두리, 그림자 설정",
     icon: "LayoutDashboard",
+    usedIn: ["칼럼 목록 카드", "꿈해몽 카드", "사전 항목 카드", "메인 콘텐츠 카드"],
     tokens: [
       { key: "--card-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 32 },
       { key: "--card-padding", label: "기본 패딩", type: "size", unit: "px", min: 8, max: 48 },
@@ -1038,9 +1280,10 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
   },
   {
     id: "input",
-    label: "인풋 / 텍스트에어리어",
+    label: "인풋 / 텍스트에어리아",
     description: "입력 필드의 높이, 패딩, 모서리, 테두리 설정",
     icon: "TextCursorInput",
+    usedIn: ["검색창", "로그인 폼", "사주 입력 폼", "문의 폼"],
     tokens: [
       { key: "--input-height-sm", label: "높이 SM", type: "size", unit: "px", min: 24, max: 56 },
       { key: "--input-height-md", label: "높이 MD", type: "size", unit: "px", min: 28, max: 64 },
@@ -1058,6 +1301,7 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "배지",
     description: "배지/태그 컴포넌트의 크기, 모서리, 폰트 설정",
     icon: "Tag",
+    usedIn: ["카테고리 태그", "상태 배지", "칼럼 카드 태그", "신규 배지"],
     tokens: [
       { key: "--badge-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 9999, description: "9999px = 완전한 pill 형태" },
       { key: "--badge-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 2, max: 20 },
@@ -1070,8 +1314,9 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
   {
     id: "bottom-nav",
     label: "바텀 네비게이션",
-    description: "하단 탭바의 높이, 배경, 아이콘/레이블 크기, 그림자 설정",
+    description: "모바일 하단 네비게이션 바의 크기, 아이콘, 레이블 설정",
     icon: "Navigation",
+    usedIn: ["모바일 전체 화면 하단", "홈/칼럼/매거진/마이페이지 이동"],
     tokens: [
       { key: "--bottom-nav-height", label: "높이", type: "size", unit: "px", min: 40, max: 80 },
       { key: "--bottom-nav-shadow", label: "그림자", type: "shadow" },
@@ -1082,9 +1327,10 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
   },
   {
     id: "gnb",
-    label: "GNB (상단 네비게이션)",
+    label: "GNB",
     description: "상단 헤더 바의 높이, 타이틀 크기, 패딩 설정",
     icon: "PanelTop",
+    usedIn: ["상세 페이지 상단 헤더", "칼럼 상세", "사전 상세", "꿈해몽 상세"],
     tokens: [
       { key: "--gnb-height", label: "높이", type: "size", unit: "px", min: 40, max: 80 },
       { key: "--gnb-shadow", label: "그림자", type: "shadow", description: "none 또는 CSS box-shadow 값" },
@@ -1097,8 +1343,10 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
   {
     id: "dialog",
     label: "다이얼로그 / 모달",
-    description: "모달 창의 모서리, 패딩, 그림자, 오버레이 설정",
+    description: "모달 사의 모서리, 패딩, 그림자, 오버레이 설정",
     icon: "RectangleHorizontal",
+    usedIn: ["사주 분석 결과 팝업", "로그인 모달", "필터 팝업", "콘텐츠 미리보기"],
+
     tokens: [
       { key: "--dialog-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 32 },
       { key: "--dialog-padding", label: "패딩", type: "size", unit: "px", min: 12, max: 48 },
@@ -1113,6 +1361,8 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "탭",
     description: "탭 컴포넌트의 배경, 모서리, 크기, 폰트 설정",
     icon: "Layers",
+    usedIn: ["칼럼 카테고리 탭", "사주 유형 선택 탭", "마이페이지 설정 탭"],
+
     tokens: [
       { key: "--tabs-list-radius", label: "탭 목록 Radius", type: "size", unit: "px", min: 0, max: 20 },
       { key: "--tabs-list-padding", label: "탭 목록 패딩", type: "size", unit: "px", min: 0, max: 12 },
@@ -1129,6 +1379,8 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "토스트 / 알림",
     description: "토스트 알림의 모서리, 패딩, 그림자, 폰트 설정",
     icon: "Bell",
+    usedIn: ["저장 성공 알림", "오류 알림", "복사 완료 알림", "로그인 알림"],
+
     tokens: [
       { key: "--toast-radius", label: "Radius", type: "size", unit: "px", min: 0, max: 24 },
       { key: "--toast-padding-x", label: "가로 패딩", type: "size", unit: "px", min: 8, max: 32 },
@@ -1143,6 +1395,8 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "셀렉트 / 드롭다운",
     description: "셀렉트 박스의 높이, 모서리, 드롭다운 패널 설정",
     icon: "ChevronDown",
+    usedIn: ["사주 유형 선택", "연도/월/일 선택", "지역 필터", "정렬 옵션"],
+
     tokens: [
       { key: "--select-trigger-height", label: "트리거 높이", type: "size", unit: "px", min: 28, max: 64 },
       { key: "--select-trigger-radius", label: "트리거 Radius", type: "size", unit: "px", min: 0, max: 20 },
@@ -1158,6 +1412,8 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "아바타",
     description: "아바타 이미지의 크기, 모서리, 테두리 설정",
     icon: "UserCircle",
+    usedIn: ["마이페이지 프로필", "코멘트 작성자", "사용자 정보 표시"],
+
     tokens: [
       { key: "--avatar-size-sm", label: "크기 SM", type: "size", unit: "px", min: 16, max: 48 },
       { key: "--avatar-size-md", label: "크기 MD", type: "size", unit: "px", min: 24, max: 64 },

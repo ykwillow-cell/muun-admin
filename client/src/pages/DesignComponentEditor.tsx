@@ -268,25 +268,41 @@ function ComponentSectionPanel({
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* 섹션 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            {ICON_MAP[section.icon] || <Shapes size={18} />}
+      <div className="px-5 py-4 border-b border-border bg-muted/30">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+              {ICON_MAP[section.icon] || <Shapes size={18} />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{section.description}</p>
+              {/* 적용 화면 태그 */}
+              {section.usedIn && section.usedIn.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-[10px] text-muted-foreground mr-0.5">적용:</span>
+                  {section.usedIn.map((place) => (
+                    <span
+                      key={place}
+                      className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium border border-primary/15"
+                    >
+                      {place}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{section.description}</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onReset(section.id)}
+            className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1 shrink-0"
+          >
+            <RotateCcw size={12} />
+            초기화
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onReset(section.id)}
-          className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1"
-        >
-          <RotateCcw size={12} />
-          초기화
-        </Button>
       </div>
 
       {/* 토큰 목록 */}
