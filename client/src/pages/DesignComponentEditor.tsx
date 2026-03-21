@@ -539,6 +539,137 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
             <div className="text-xs text-muted-foreground">다이얼로그 내용 영역입니다.</div>
           </div>
         </div>
+
+        <Separator />
+
+        {/* ── 운세 결과 페이지 미리보기 ── */}
+        <div className="space-y-3">
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">운세 결과 페이지</p>
+
+          {/* 사주 차트 카드 */}
+          <div
+            className="border transition-all overflow-hidden"
+            style={{
+              background: componentTokens["result-page"]?.["--result-chart-bg"] || "rgba(0,0,0,0.04)",
+              borderRadius: componentTokens["result-page"]?.["--result-chart-radius"] || "16px",
+              borderColor: componentTokens["result-page"]?.["--result-card-border"] || "rgba(0,0,0,0.08)",
+              borderWidth: "1px",
+              padding: "12px",
+            }}
+          >
+            {/* 차트 헤더 */}
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+                style={{
+                  background: componentTokens["result-page"]?.["--result-icon-bg"] || "rgba(107,95,255,0.12)",
+                  color: componentTokens["result-page"]?.["--result-accent-primary"] || "#6B5FFF",
+                }}
+              >
+                命
+              </div>
+              <span className="text-xs font-semibold text-foreground">김무운님의 사주팔자</span>
+            </div>
+
+            {/* 사주 기둥 4개 */}
+            <div className="grid grid-cols-4 gap-1.5 mb-3">
+              {[
+                { label: "시주", hanja: "戊", sub: "무(양토)", bg: "#f5e6c8", color: "#c8860a" },
+                { label: "일주", hanja: "癸", sub: "계(음수)", bg: "#dbeafe", color: "#2563eb", isMe: true },
+                { label: "월주", hanja: "乙", sub: "을(음목)", bg: "#dcfce7", color: "#16a34a" },
+                { label: "연주", hanja: "乙", sub: "을(음목)", bg: "#dcfce7", color: "#16a34a" },
+              ].map((col, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <span
+                    className="text-[9px] font-medium"
+                    style={{ color: componentTokens["result-page"]?.["--result-label-color"] || "rgba(90,90,86,0.80)" }}
+                  >
+                    {col.label}
+                  </span>
+                  <div
+                    className="w-full aspect-square rounded-lg flex items-center justify-center relative"
+                    style={{ background: col.bg }}
+                  >
+                    {col.isMe && (
+                      <span
+                        className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white"
+                        style={{ background: componentTokens["result-page"]?.["--result-accent-primary"] || "#6B5FFF" }}
+                      >
+                        나
+                      </span>
+                    )}
+                    <span className="text-base font-bold" style={{ color: col.color }}>{col.hanja}</span>
+                  </div>
+                  <span className="text-[8px]" style={{ color: componentTokens["result-page"]?.["--result-label-color"] || "rgba(90,90,86,0.80)" }}>
+                    {col.sub}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* 간지 요약 박스 */}
+            <div
+              className="rounded-lg px-3 py-2 text-center transition-all"
+              style={{
+                background: componentTokens["result-page"]?.["--result-summary-bg"] || "rgba(234,179,8,0.10)",
+              }}
+            >
+              <div className="text-[9px] text-muted-foreground mb-0.5">사주팔자 간지(干支)</div>
+              <div className="text-[10px] font-semibold text-foreground">乙丑년 乙酉월 癸酉일 戊午시</div>
+            </div>
+          </div>
+
+          {/* 결과 분석 카드 */}
+          <div
+            className="border transition-all"
+            style={{
+              background: componentTokens["result-page"]?.["--result-card-bg"] || "rgba(0,0,0,0.04)",
+              borderColor: componentTokens["result-page"]?.["--result-card-border"] || "rgba(0,0,0,0.08)",
+              borderWidth: "1px",
+              borderRadius: componentTokens["result-page"]?.["--result-chart-radius"] || "16px",
+              padding: "12px",
+            }}
+          >
+            {/* 섹션 헤더 */}
+            <div className="flex items-center gap-2 mb-2">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px]"
+                style={{
+                  background: componentTokens["result-page"]?.["--result-icon-bg"] || "rgba(107,95,255,0.12)",
+                }}
+              >
+                ?
+              </div>
+              <span
+                className="font-semibold transition-all"
+                style={{
+                  fontSize: componentTokens["result-page"]?.["--result-section-title-size"] || "18px",
+                  fontWeight: componentTokens["result-page"]?.["--result-section-title-weight"] || "700",
+                  color: componentTokens["result-page"]?.["--result-accent-primary"] || "#6B5FFF",
+                }}
+              >
+                사주팔자 읽어볼까요?
+              </span>
+            </div>
+            <p
+              className="leading-relaxed transition-all"
+              style={{
+                fontSize: componentTokens["result-page"]?.["--result-body-size"] || "15px",
+                color: "var(--foreground)",
+              }}
+            >
+              위에 보이는 표는 <strong>만세력</strong> 또는 <strong>사주팔자</strong>라고 불러요.
+            </p>
+            <div className="mt-2 flex items-center gap-1">
+              <span
+                className="text-xs font-medium"
+                style={{ color: componentTokens["result-page"]?.["--result-accent-secondary"] || "rgba(107,95,255,0.60)" }}
+              >
+                더 알아보기 →
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
