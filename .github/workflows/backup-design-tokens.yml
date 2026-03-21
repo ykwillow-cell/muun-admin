@@ -1,0 +1,32 @@
+name: Backup Design Tokens
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # 매일 오전 3시(KST) 자동 실행
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run backup script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/backup_tokens.py
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-backup design tokens [skip ci]" && git push)
