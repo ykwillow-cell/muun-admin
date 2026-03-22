@@ -1212,7 +1212,7 @@ export default function DesignComponentEditor() {
       </div>
 
       {/* 컴포넌트 섹션 필터 탭 */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex items-start gap-1.5 flex-wrap pb-1">
         <button
           onClick={() => setActiveSection(null)}
           className={cn(
