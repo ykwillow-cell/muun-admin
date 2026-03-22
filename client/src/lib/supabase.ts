@@ -892,7 +892,12 @@ export interface ComponentTokens {
   avatar?: ComponentTokenGroup;    // 아바타
   divider?: ComponentTokenGroup;   // 구분선
   scrollbar?: ComponentTokenGroup; // 스크롤바
-  "result-page"?: ComponentTokenGroup; // 운세 결과 페이지
+  "result-page"?: ComponentTokenGroup; // 운세 결과 페이지 (사주/궁합/가족사주)
+  "tarot-result"?: ComponentTokenGroup; // 타로 결과
+  "daily-fortune-result"?: ComponentTokenGroup; // 오늘의운세/토정비결 결과
+  "naming-result"?: ComponentTokenGroup; // 작명 결과
+  "dream-result"?: ComponentTokenGroup; // 꿈해몽 결과
+  "misc-result"?: ComponentTokenGroup; // 점심메뉴/점성술/심리테스트/전생 결과
   [key: string]: ComponentTokenGroup | undefined;
 }
 
@@ -1570,7 +1575,7 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
     label: "운세 결과 페이지",
     description: "사주 분석·신년운세·궁합 등 운세 결과 화면의 색상, 배경, 강조 스타일 설정",
     icon: "ScrollText",
-    usedIn: ["평생사주 결과", "신년운세 결과", "궁합 결과", "가족사주 결과"],
+    usedIn: ["평생사주 결과", "신년운세 결과", "궁합 결과", "가족사주 결과", "점성술 결과"],
     tokens: [
       { key: "--result-chart-bg", label: "사주 차트 배경", type: "color", description: "사주팔자표 전체 배경색 (rgba 또는 hex)" },
       { key: "--result-chart-radius", label: "사주 차트 Radius", type: "size", unit: "px", min: 0, max: 32 },
@@ -1584,6 +1589,92 @@ export const COMPONENT_TOKEN_DEFINITIONS: ComponentSection[] = [
       { key: "--result-section-title-weight", label: "섹션 제목 굵기", type: "font-weight" },
       { key: "--result-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
       { key: "--result-label-color", label: "레이블 색상", type: "color", description: "보조 텍스트 색상 (설명, 레이블 등)" },
+    ],
+  },
+  {
+    id: "tarot-result",
+    label: "타로 결과",
+    description: "타로 카드 결과 화면의 스타일 설정",
+    icon: "Sparkles",
+    usedIn: ["타로 결과"],
+    tokens: [
+      { key: "--tarot-card-bg", label: "카드 배경", type: "color", description: "타로 결과 카드 배경색" },
+      { key: "--tarot-card-border", label: "카드 테두리", type: "color", description: "타로 카드 테두리 색상" },
+      { key: "--tarot-accent", label: "강조색", type: "color", description: "타로 페이지 주요 강조색 (제목, 아이콘 등)" },
+      { key: "--tarot-bg-glow-1", label: "배경 광효 1", type: "color", description: "페이지 좌상단 배경 광효 색상" },
+      { key: "--tarot-bg-glow-2", label: "배경 광효 2", type: "color", description: "페이지 우하단 배경 광효 색상" },
+      { key: "--tarot-result-card-bg", label: "결과 영역 배경", type: "color", description: "타로 해석 결과 영역 배경" },
+      { key: "--tarot-section-title-size", label: "제목 폰트 크기", type: "font-size", unit: "px", min: 14, max: 24 },
+      { key: "--tarot-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
+    ],
+  },
+  {
+    id: "daily-fortune-result",
+    label: "오늘의운세 / 토정비결 결과",
+    description: "오늘의운세와 토정비결 결과 화면 스타일 설정",
+    icon: "Sun",
+    usedIn: ["오늘의운세 결과", "토정비결 결과"],
+    tokens: [
+      { key: "--daily-result-card-bg", label: "결과 카드 배경", type: "color", description: "운세 결과 카드 배경색" },
+      { key: "--daily-result-card-border", label: "결과 카드 테두리", type: "color", description: "운세 결과 카드 테두리 색상" },
+      { key: "--daily-accent", label: "강조색", type: "color", description: "오늘의운세 주요 강조색" },
+      { key: "--daily-icon-bg", label: "섹션 아이콘 배경", type: "color", description: "섹션 제목 옆 아이콘 배경" },
+      { key: "--daily-gradient-from", label: "그라디언트 시작색", type: "color", description: "토정비결 스페셜 영역 그라디언트 시작" },
+      { key: "--daily-gradient-to", label: "그라디언트 끝색", type: "color", description: "토정비결 스페셜 영역 그라디언트 끝" },
+      { key: "--daily-section-title-size", label: "섹션 제목 크기", type: "font-size", unit: "px", min: 14, max: 24 },
+      { key: "--daily-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
+    ],
+  },
+  {
+    id: "naming-result",
+    label: "작명 결과",
+    description: "작명 추천 결과 화면의 스타일 설정",
+    icon: "PenLine",
+    usedIn: ["작명 결과"],
+    tokens: [
+      { key: "--naming-card-bg", label: "이름 카드 배경", type: "color", description: "추천 이름 카드 배경색" },
+      { key: "--naming-card-border", label: "이름 카드 테두리", type: "color", description: "이름 카드 테두리 색상" },
+      { key: "--naming-selected-bg", label: "선택된 이름 배경", type: "color", description: "선택된 이름 카드 강조 배경" },
+      { key: "--naming-selected-border", label: "선택된 이름 테두리", type: "color", description: "선택된 이름 카드 테두리" },
+      { key: "--naming-gil-bg", label: "길(吉) 배경", type: "color", description: "길한 이름 표시 배경색" },
+      { key: "--naming-gil-color", label: "길(吉) 텍스트", type: "color", description: "길한 이름 표시 텍스트 색상" },
+      { key: "--naming-흉-bg", label: "흉(凶) 배경", type: "color", description: "흉한 이름 표시 배경색" },
+      { key: "--naming-흉-color", label: "흉(凶) 텍스트", type: "color", description: "흉한 이름 표시 텍스트 색상" },
+      { key: "--naming-score-high-bg", label: "높은 점수 배경", type: "color", description: "90점 이상 점수 배지 배경" },
+      { key: "--naming-score-high-color", label: "높은 점수 텍스트", type: "color", description: "90점 이상 점수 배지 텍스트" },
+      { key: "--naming-accent", label: "강조색", type: "color", description: "작명 페이지 주요 강조색" },
+    ],
+  },
+  {
+    id: "dream-result",
+    label: "꿈해몽 결과",
+    description: "꿈해몽 결과 화면의 스타일 설정",
+    icon: "Moon",
+    usedIn: ["꿈해몽 결과"],
+    tokens: [
+      { key: "--dream-result-card-bg", label: "결과 카드 배경", type: "color", description: "꿈해몽 결과 카드 배경" },
+      { key: "--dream-result-card-border", label: "결과 카드 테두리", type: "color", description: "꿈해몽 결과 카드 테두리" },
+      { key: "--dream-accent", label: "강조색", type: "color", description: "꿈해몽 페이지 주요 강조색" },
+      { key: "--dream-hero-from", label: "히어로 그라디언트 시작", type: "color", description: "페이지 상단 히어로 그라디언트 시작색" },
+      { key: "--dream-category-animal-bg", label: "동물 카테고리 배경", type: "color", description: "동물 카테고리 카드 배경" },
+      { key: "--dream-category-nature-bg", label: "자연 카테고리 배경", type: "color", description: "자연/현상 카테고리 카드 배경" },
+      { key: "--dream-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
+    ],
+  },
+  {
+    id: "misc-result",
+    label: "기타 서비스 결과",
+    description: "행운의 점심메뉴, 심리테스트, 전생 결과 화면 스타일 설정",
+    icon: "Layers",
+    usedIn: ["행운의 점심메뉴", "심리테스트", "전생"],
+    tokens: [
+      { key: "--misc-result-card-bg", label: "결과 카드 배경", type: "color", description: "결과 카드 배경색" },
+      { key: "--misc-result-card-border", label: "결과 카드 테두리", type: "color", description: "결과 카드 테두리 색상" },
+      { key: "--misc-accent", label: "강조색", type: "color", description: "기타 서비스 주요 강조색" },
+      { key: "--lunch-accent", label: "점심메뉴 강조색", type: "color", description: "행운의 점심메뉴 amber 강조색" },
+      { key: "--lunch-card-bg", label: "점심메뉴 결과 카드", type: "color", description: "메뉴 추천 카드 배경" },
+      { key: "--psychology-accent", label: "심리테스트 강조색", type: "color", description: "심리테스트 주요 강조색" },
+      { key: "--misc-body-size", label: "본문 폰트 크기", type: "font-size", unit: "px", min: 12, max: 18 },
     ],
   },
 ];

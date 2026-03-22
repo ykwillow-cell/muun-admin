@@ -45,6 +45,10 @@ import {
   Loader2,
   CheckCircle2,
   ScrollText,
+  Sun,
+  Moon,
+  PenLine,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -65,6 +69,10 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ChevronDown: <ChevronDown size={18} />,
   UserCircle: <UserCircle size={18} />,
   ScrollText: <ScrollText size={18} />,
+  Sun: <Sun size={18} />,
+  Moon: <Moon size={18} />,
+  PenLine: <PenLine size={18} />,
+  Sparkles: <Sparkles size={18} />,
 };
 
 // ── 숫자 파싱 유틸 ──
@@ -671,6 +679,161 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
           </div>
         </div>
       </div>
+
+      {/* ── 타로 결과 미리보기 ── */}
+      <div className="mt-6">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">타로 결과</p>
+        <div
+          className="rounded-2xl p-4 border relative overflow-hidden"
+          style={{
+            background: componentTokens["tarot-result"]?.["--tarot-card-bg"] || "rgba(0,0,0,0.05)",
+            borderColor: componentTokens["tarot-result"]?.["--tarot-card-border"] || "rgba(0,0,0,0.10)",
+          }}
+        >
+          {/* 배경 광효 */}
+          <div className="absolute top-[-20%] left-[-10%] w-32 h-32 rounded-full blur-2xl opacity-60" style={{ background: componentTokens["tarot-result"]?.["--tarot-bg-glow-1"] || "rgba(107,95,255,0.10)" }} />
+          <div className="absolute bottom-[-20%] right-[-10%] w-32 h-32 rounded-full blur-2xl opacity-60" style={{ background: componentTokens["tarot-result"]?.["--tarot-bg-glow-2"] || "rgba(147,51,234,0.10)" }} />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: componentTokens["tarot-result"]?.["--tarot-bg-glow-1"] || "rgba(107,95,255,0.15)" }}>
+                <span style={{ color: componentTokens["tarot-result"]?.["--tarot-accent"] || "#6B5FFF", fontSize: "14px" }}>✦</span>
+              </div>
+              <span className="font-bold" style={{ fontSize: componentTokens["tarot-result"]?.["--tarot-section-title-size"] || "18px", color: componentTokens["tarot-result"]?.["--tarot-accent"] || "#6B5FFF" }}>타로 카드 결과</span>
+            </div>
+            <div
+              className="rounded-xl p-3 border"
+              style={{
+                background: componentTokens["tarot-result"]?.["--tarot-result-card-bg"] || "rgba(0,0,0,0.05)",
+                borderColor: componentTokens["tarot-result"]?.["--tarot-card-border"] || "rgba(0,0,0,0.10)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-10 h-14 rounded-lg bg-gradient-to-b flex items-center justify-center text-lg" style={{ background: `linear-gradient(to bottom, ${componentTokens["tarot-result"]?.["--tarot-bg-glow-1"] || "rgba(107,95,255,0.20)"}, ${componentTokens["tarot-result"]?.["--tarot-bg-glow-2"] || "rgba(147,51,234,0.20)"})` }}>🌙</div>
+                <div>
+                  <div className="text-xs font-bold" style={{ color: componentTokens["tarot-result"]?.["--tarot-accent"] || "#6B5FFF" }}>달 (The Moon)</div>
+                  <div className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["tarot-result"]?.["--tarot-body-size"] || "15px", fontSize: "10px" }}>직관과 무의식의 카드</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 오늘의운세 / 토정비결 결과 미리보기 ── */}
+      <div className="mt-6">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">오늘의운세 / 토정비결 결과</p>
+        <div
+          className="rounded-2xl p-4 border"
+          style={{
+            background: componentTokens["daily-fortune-result"]?.["--daily-result-card-bg"] || "rgba(0,0,0,0.05)",
+            borderColor: componentTokens["daily-fortune-result"]?.["--daily-result-card-border"] || "rgba(0,0,0,0.10)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: componentTokens["daily-fortune-result"]?.["--daily-icon-bg"] || "rgba(107,95,255,0.20)" }}>
+              <span style={{ color: componentTokens["daily-fortune-result"]?.["--daily-accent"] || "#6B5FFF", fontSize: "14px" }}>☀</span>
+            </div>
+            <span className="font-bold" style={{ fontSize: componentTokens["daily-fortune-result"]?.["--daily-section-title-size"] || "18px", color: componentTokens["daily-fortune-result"]?.["--daily-accent"] || "#6B5FFF" }}>오늘의 운세</span>
+          </div>
+          <div
+            className="rounded-xl p-3 border"
+            style={{
+              background: `linear-gradient(135deg, ${componentTokens["daily-fortune-result"]?.["--daily-gradient-from"] || "rgba(107,95,255,0.10)"}, ${componentTokens["daily-fortune-result"]?.["--daily-gradient-to"] || "rgba(147,51,234,0.10)"})`,
+              borderColor: componentTokens["daily-fortune-result"]?.["--daily-result-card-border"] || "rgba(0,0,0,0.10)",
+            }}
+          >
+            <p className="text-xs" style={{ fontSize: componentTokens["daily-fortune-result"]?.["--daily-body-size"] || "15px", fontSize: "11px" }}>재물운이 열리는 날. 막혔던 흐름이 풀리는 시기입니다.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 작명 결과 미리보기 ── */}
+      <div className="mt-6">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">작명 결과</p>
+        <div className="space-y-2">
+          {/* 선택된 이름 카드 */}
+          <div
+            className="rounded-xl p-3 border flex items-center justify-between"
+            style={{
+              background: componentTokens["naming-result"]?.["--naming-selected-bg"] || "rgba(107,95,255,0.10)",
+              borderColor: componentTokens["naming-result"]?.["--naming-selected-border"] || "rgba(107,95,255,0.40)",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm" style={{ color: componentTokens["naming-result"]?.["--naming-accent"] || "#6B5FFF" }}>김무운</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: componentTokens["naming-result"]?.["--naming-gil-bg"] || "rgba(107,95,255,0.08)", color: componentTokens["naming-result"]?.["--naming-gil-color"] || "#6B5FFF" }}>길(吉)</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: componentTokens["naming-result"]?.["--naming-score-high-bg"] || "rgba(16,185,129,0.20)", color: componentTokens["naming-result"]?.["--naming-score-high-color"] || "#059669" }}>95점</span>
+          </div>
+          {/* 일반 이름 카드 */}
+          <div
+            className="rounded-xl p-3 border flex items-center justify-between"
+            style={{
+              background: componentTokens["naming-result"]?.["--naming-card-bg"] || "rgba(0,0,0,0.05)",
+              borderColor: componentTokens["naming-result"]?.["--naming-card-border"] || "rgba(0,0,0,0.10)",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm">김운세</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: componentTokens["naming-result"]?.["--naming-흉-bg"] || "rgba(239,68,68,0.08)", color: componentTokens["naming-result"]?.["--naming-흉-color"] || "#dc2626" }}>흉(凶)</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">72점</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 꿈해몽 결과 미리보기 ── */}
+      <div className="mt-6">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">꿈해몽 결과</p>
+        <div
+          className="rounded-2xl p-4 border"
+          style={{
+            background: componentTokens["dream-result"]?.["--dream-result-card-bg"] || "rgba(0,0,0,0.05)",
+            borderColor: componentTokens["dream-result"]?.["--dream-result-card-border"] || "rgba(0,0,0,0.10)",
+          }}
+        >
+          <div className="flex gap-2 mb-3">
+            <div className="px-2 py-1 rounded-full text-[10px] font-medium" style={{ background: componentTokens["dream-result"]?.["--dream-category-animal-bg"] || "rgba(251,146,60,0.10)", color: "#f97316" }}>동물</div>
+            <div className="px-2 py-1 rounded-full text-[10px] font-medium" style={{ background: componentTokens["dream-result"]?.["--dream-category-nature-bg"] || "rgba(74,222,128,0.10)", color: "#22c55e" }}>자연</div>
+          </div>
+          <p className="text-xs" style={{ fontSize: componentTokens["dream-result"]?.["--dream-body-size"] || "15px", fontSize: "11px", color: componentTokens["dream-result"]?.["--dream-accent"] || "#6B5FFF" }}>호랑이 꿈 해석 결과</p>
+          <p className="text-[10px] text-muted-foreground mt-1">강한 에너지와 리더십을 상징합니다.</p>
+        </div>
+      </div>
+
+      {/* ── 기타 서비스 결과 미리보기 ── */}
+      <div className="mt-6">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">행운의 점심메뉴 / 심리테스트</p>
+        <div className="space-y-2">
+          {/* 점심메뉴 카드 */}
+          <div
+            className="rounded-xl p-3 border"
+            style={{
+              background: componentTokens["misc-result"]?.["--lunch-card-bg"] || "rgba(245,158,11,0.05)",
+              borderColor: `${componentTokens["misc-result"]?.["--lunch-accent"] || "rgba(245,158,11,1)"}33`,
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span style={{ color: componentTokens["misc-result"]?.["--lunch-accent"] || "rgba(245,158,11,1)", fontSize: "18px" }}>🍱</span>
+              <div>
+                <div className="text-xs font-bold" style={{ color: componentTokens["misc-result"]?.["--lunch-accent"] || "rgba(245,158,11,1)" }}>오늘의 추천 메뉴</div>
+                <div className="text-[10px] text-muted-foreground">비빔밥 — 오행 균형 최적</div>
+              </div>
+            </div>
+          </div>
+          {/* 심리테스트 결과 카드 */}
+          <div
+            className="rounded-xl p-3 border"
+            style={{
+              background: componentTokens["misc-result"]?.["--misc-result-card-bg"] || "rgba(0,0,0,0.05)",
+              borderColor: componentTokens["misc-result"]?.["--misc-result-card-border"] || "rgba(0,0,0,0.10)",
+            }}
+          >
+            <div className="text-xs font-bold mb-1" style={{ color: componentTokens["misc-result"]?.["--psychology-accent"] || "#6B5FFF" }}>심리테스트 결과</div>
+            <p className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["misc-result"]?.["--misc-body-size"] || "15px", fontSize: "10px" }}>당신은 직관형 리더입니다.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -834,6 +997,57 @@ const DEFAULT_COMPONENT_TOKENS: ComponentTokens = {
     "--result-section-title-weight": "700",
     "--result-body-size": "15px",
     "--result-label-color": "rgba(90,90,86,0.80)",
+  },
+  "tarot-result": {
+    "--tarot-card-bg": "rgba(0,0,0,0.05)",
+    "--tarot-card-border": "rgba(0,0,0,0.10)",
+    "--tarot-accent": "var(--primary, #6B5FFF)",
+    "--tarot-bg-glow-1": "rgba(107,95,255,0.10)",
+    "--tarot-bg-glow-2": "rgba(147,51,234,0.10)",
+    "--tarot-result-card-bg": "rgba(0,0,0,0.05)",
+    "--tarot-section-title-size": "18px",
+    "--tarot-body-size": "15px",
+  },
+  "daily-fortune-result": {
+    "--daily-result-card-bg": "rgba(0,0,0,0.05)",
+    "--daily-result-card-border": "rgba(0,0,0,0.10)",
+    "--daily-accent": "var(--primary, #6B5FFF)",
+    "--daily-icon-bg": "rgba(107,95,255,0.20)",
+    "--daily-gradient-from": "rgba(107,95,255,0.10)",
+    "--daily-gradient-to": "rgba(147,51,234,0.10)",
+    "--daily-section-title-size": "18px",
+    "--daily-body-size": "15px",
+  },
+  "naming-result": {
+    "--naming-card-bg": "rgba(0,0,0,0.05)",
+    "--naming-card-border": "rgba(0,0,0,0.10)",
+    "--naming-selected-bg": "rgba(107,95,255,0.10)",
+    "--naming-selected-border": "rgba(107,95,255,0.40)",
+    "--naming-gil-bg": "rgba(107,95,255,0.08)",
+    "--naming-gil-color": "#6B5FFF",
+    "--naming-흉-bg": "rgba(239,68,68,0.08)",
+    "--naming-흉-color": "#dc2626",
+    "--naming-score-high-bg": "rgba(16,185,129,0.20)",
+    "--naming-score-high-color": "#059669",
+    "--naming-accent": "var(--primary, #6B5FFF)",
+  },
+  "dream-result": {
+    "--dream-result-card-bg": "rgba(0,0,0,0.05)",
+    "--dream-result-card-border": "rgba(0,0,0,0.10)",
+    "--dream-accent": "var(--primary, #6B5FFF)",
+    "--dream-hero-from": "rgba(147,51,234,0.10)",
+    "--dream-category-animal-bg": "rgba(251,146,60,0.10)",
+    "--dream-category-nature-bg": "rgba(74,222,128,0.10)",
+    "--dream-body-size": "15px",
+  },
+  "misc-result": {
+    "--misc-result-card-bg": "rgba(0,0,0,0.05)",
+    "--misc-result-card-border": "rgba(0,0,0,0.10)",
+    "--misc-accent": "var(--primary, #6B5FFF)",
+    "--lunch-accent": "rgba(245,158,11,1)",
+    "--lunch-card-bg": "rgba(245,158,11,0.05)",
+    "--psychology-accent": "var(--primary, #6B5FFF)",
+    "--misc-body-size": "15px",
   },
 };
 
