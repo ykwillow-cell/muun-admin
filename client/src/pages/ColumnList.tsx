@@ -42,7 +42,9 @@ export default function ColumnList() {
         const tb = b.title || b.name || "";
         return ta.localeCompare(tb, "ko");
       }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      const dateA = a.published_at || a.created_at;
+      const dateB = b.published_at || b.created_at;
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
 
   const handleDelete = async (id: string, title: string) => {
@@ -123,7 +125,7 @@ export default function ColumnList() {
                   ? "bg-slate-900 text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
-              title="최신 작성일순"
+              title="최신 발행일순"
             >
               <CalendarDays className="w-4 h-4" />
               최신순
@@ -168,7 +170,7 @@ export default function ColumnList() {
                       <TableHead className="w-[40%]">제목</TableHead>
                       <TableHead>카테고리</TableHead>
                       <TableHead>상태</TableHead>
-                      <TableHead>작성일</TableHead>
+                      <TableHead>발행일</TableHead>
                       <TableHead className="text-right">작업</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -210,7 +212,9 @@ export default function ColumnList() {
                             </span>
                           </TableCell>
                           <TableCell className="text-slate-500 text-sm">
-                            {new Date(column.created_at).toLocaleDateString("ko-KR")}
+                            {column.published_at
+                              ? new Date(column.published_at).toLocaleDateString("ko-KR")
+                              : <span className="text-slate-400 text-xs">미발행</span>}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex gap-1 justify-end">
