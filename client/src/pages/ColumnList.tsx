@@ -42,6 +42,10 @@ export default function ColumnList() {
         const tb = b.title || b.name || "";
         return ta.localeCompare(tb, "ko");
       }
+      // 임시저장(미발행)을 맨 위에 정렬
+      if (!a.published && b.published) return -1;
+      if (a.published && !b.published) return 1;
+      // 같은 상태끼리는 발행일 내림차순
       const dateA = a.published_at || a.created_at;
       const dateB = b.published_at || b.created_at;
       return new Date(dateB).getTime() - new Date(dateA).getTime();
