@@ -11,6 +11,44 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Supabase Data API는 프로젝트 설정의 Max Rows 기본값이 1,000인 경우가 많습니다.
+// .select()만 사용하면 관리자 목록에서 1,000개까지만 보일 수 있어,
+// 목록/중복검사용 조회는 range()로 페이지를 나눠 전체를 가져옵니다.
+const SUPABASE_PAGE_SIZE = 1000;
+
+async function fetchAllRows<T>(
+  table: string,
+  select = "*",
+  orderBy?: string,
+  ascending = false
+): Promise<T[]> {
+  const rows: T[] = [];
+  let from = 0;
+
+  while (true) {
+    const to = from + SUPABASE_PAGE_SIZE - 1;
+    let query = supabase
+      .from(table)
+      .select(select)
+      .range(from, to);
+
+    if (orderBy) {
+      query = query.order(orderBy, { ascending });
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const pageRows = (data || []) as T[];
+    rows.push(...pageRows);
+
+    if (pageRows.length < SUPABASE_PAGE_SIZE) break;
+    from += SUPABASE_PAGE_SIZE;
+  }
+
+  return rows;
+}
+
 // =====================================================
 // 타입 정의
 // =====================================================
@@ -64,15 +102,12 @@ export const CATEGORY_OPTIONS = [
 // =====================================================
 export const columnApi = {
   async getAll() {
-    const { data, error } = await supabase
-      .from("columns")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
+    try {
+      return await fetchAllRows<Column>("columns", "*", "created_at", false);
+    } catch (error) {
       console.error("Supabase getAll error:", error);
       throw error;
     }
-    return (data || []) as Column[];
   },
 
   async getById(id: string) {
@@ -338,15 +373,12 @@ function generateSlug(keyword: string): string {
 
 export const dreamApi = {
   async getAll() {
-    const { data, error } = await supabase
-      .from("dreams")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
+    try {
+      return await fetchAllRows<Dream>("dreams", "*", "created_at", false);
+    } catch (error) {
       console.error("dreamApi getAll error:", error);
       throw error;
     }
-    return (data || []) as Dream[];
   },
 
   async getById(id: string) {
@@ -541,15 +573,12 @@ function generateDictionarySlug(title: string): string {
 
 export const dictionaryApi = {
   async getAll() {
-    const { data, error } = await supabase
-      .from("fortune_dictionary")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
+    try {
+      return await fetchAllRows<FortuneDictionary>("fortune_dictionary", "*", "created_at", false);
+    } catch (error) {
       console.error("dictionaryApi getAll error:", error);
       throw error;
     }
-    return (data || []) as FortuneDictionary[];
   },
 
   async getById(id: string) {
@@ -710,12 +739,9 @@ export async function checkDreamSimilarity(
   excludeId?: string
 ): Promise<SimilarDream[]> {
   // 1. 기존 꿈해몽 목록 전체 조회 (keyword, slug만)
-  const { data, error } = await supabase
-    .from("dreams")
-    .select("id, keyword, slug");
-
-  if (error) throw error;
-  if (!data || data.length === 0) return [];
+  // 1,000개 초과 데이터도 중복 검사 대상에 포함되도록 페이지네이션 조회
+  const data = await fetchAllRows<SimilarDream>("dreams", "id, keyword, slug");
+  if (data.length === 0) return [];
 
   // 2. 유사도 계산 및 90% 이상 필터링
   const results: SimilarDream[] = [];
