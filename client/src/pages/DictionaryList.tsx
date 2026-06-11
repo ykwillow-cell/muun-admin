@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Edit2, Trash2, Plus, Search, BookOpen, ArrowLeft, ArrowUpAZ, CalendarDays } from "lucide-react";
+import { Edit2, Trash2, Plus, Search, BookOpen, Eye, ArrowLeft, ArrowUpAZ, CalendarDays } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDictionaryList, useDeleteDictionary } from "@/lib/queries";
 import { DICTIONARY_CATEGORY_OPTIONS } from "@/lib/supabase";
@@ -22,7 +22,7 @@ export default function DictionaryList() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"date" | "title">("date");
+  const [sortBy, setSortBy] = useState<"date" | "title" | "views">("date");
 
   const { data: items = [], isLoading } = useDictionaryList();
   const deleteMutation = useDeleteDictionary();
@@ -43,6 +43,9 @@ export default function DictionaryList() {
     .sort((a: any, b: any) => {
       if (sortBy === "title") {
         return a.title.localeCompare(b.title, "ko");
+      }
+      if (sortBy === "views") {
+        return (b.view_count || 0) - (a.view_count || 0);
       }
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
@@ -187,6 +190,17 @@ export default function DictionaryList() {
                   <ArrowUpAZ className="w-3 h-3" />
                   제목순
                 </button>
+                <button
+                  onClick={() => setSortBy("views")}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                    sortBy === "views"
+                      ? "bg-amber-600 text-white border-amber-600"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-amber-400"
+                  }`}
+                >
+                  <Eye className="w-3 h-3" />
+                  조회수순
+                </button>
               </div>
 
               {/* 카테고리 필터 태그 */}
@@ -235,6 +249,7 @@ export default function DictionaryList() {
                     <TableHead>제목</TableHead>
                     <TableHead className="w-28">카테고리</TableHead>
                     <TableHead className="w-24">태그</TableHead>
+                    <TableHead className="w-20">조회수</TableHead>
                     <TableHead className="w-24">상태</TableHead>
                     <TableHead className="w-28">등록일</TableHead>
                     <TableHead className="w-20 text-right">관리</TableHead>
@@ -261,6 +276,12 @@ export default function DictionaryList() {
                           {(item.tags || []).length > 2 && (
                             <span className="text-xs text-slate-400">+{item.tags.length - 2}</span>
                           )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-700 text-sm font-medium">
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5 text-slate-400" />
+                          {(item.view_count || 0).toLocaleString()}
                         </div>
                       </TableCell>
                       <TableCell>

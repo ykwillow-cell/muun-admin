@@ -22,7 +22,7 @@ export default function DreamList() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"date" | "keyword">("date");
+  const [sortBy, setSortBy] = useState<"date" | "keyword" | "views">("date");
 
   const { data: dreams = [], isLoading } = useDreamsList();
   const deleteDreamMutation = useDeleteDream();
@@ -41,6 +41,9 @@ export default function DreamList() {
     .sort((a: any, b: any) => {
       if (sortBy === "keyword") {
         return a.keyword.localeCompare(b.keyword, "ko");
+      }
+      if (sortBy === "views") {
+        return (b.view_count || 0) - (a.view_count || 0);
       }
       // date: 최신순
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -165,6 +168,18 @@ export default function DreamList() {
               <ArrowUpAZ className="w-4 h-4" />
               제목순
             </button>
+            <button
+              onClick={() => setSortBy("views")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "views"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="조회수 높은순"
+            >
+              <Eye className="w-4 h-4" />
+              조회수순
+            </button>
           </div>
         </div>
 
@@ -193,6 +208,7 @@ export default function DreamList() {
                       <TableHead>카테고리</TableHead>
                       <TableHead>등급</TableHead>
                       <TableHead>점수</TableHead>
+                      <TableHead>조회수</TableHead>
                       <TableHead>상태</TableHead>
                       <TableHead>작성일</TableHead>
                       <TableHead className="text-right">작업</TableHead>
@@ -216,6 +232,12 @@ export default function DreamList() {
                         </TableCell>
                         <TableCell className="text-slate-700 font-medium">
                           {dream.score}점
+                        </TableCell>
+                        <TableCell className="text-slate-700 text-sm font-medium">
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-3.5 h-3.5 text-slate-400" />
+                            {(dream.view_count || 0).toLocaleString()}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <span

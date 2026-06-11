@@ -69,6 +69,7 @@ export interface Column {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface ColumnFormData {
@@ -328,6 +329,7 @@ export interface Dream {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface DreamFormData {
@@ -533,6 +535,7 @@ export interface FortuneDictionary {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface FortuneDictionaryFormData {

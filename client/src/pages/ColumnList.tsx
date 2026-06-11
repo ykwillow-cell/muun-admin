@@ -21,7 +21,7 @@ export default function ColumnList() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
-  const [sortBy, setSortBy] = useState<"date" | "title">("date");
+  const [sortBy, setSortBy] = useState<"date" | "title" | "views">("date");
 
   const { data: columns = [], isLoading } = useColumnsList();
   const deleteColumnMutation = useDeleteColumn();
@@ -41,6 +41,9 @@ export default function ColumnList() {
         const ta = a.title || a.name || "";
         const tb = b.title || b.name || "";
         return ta.localeCompare(tb, "ko");
+      }
+      if (sortBy === "views") {
+        return (b.view_count || 0) - (a.view_count || 0);
       }
       // 임시저장(미발행)을 맨 위에 정렬
       if (!a.published && b.published) return -1;
@@ -146,6 +149,18 @@ export default function ColumnList() {
               <ArrowUpAZ className="w-4 h-4" />
               제목순
             </button>
+            <button
+              onClick={() => setSortBy("views")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                sortBy === "views"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+              title="조회수 높은순"
+            >
+              <Eye className="w-4 h-4" />
+              조회수순
+            </button>
           </div>
         </div>
 
@@ -171,9 +186,10 @@ export default function ColumnList() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-16">썸네일</TableHead>
-                      <TableHead className="w-[40%]">제목</TableHead>
+                      <TableHead className="w-[35%]">제목</TableHead>
                       <TableHead>카테고리</TableHead>
                       <TableHead>상태</TableHead>
+                      <TableHead>조회수</TableHead>
                       <TableHead>발행일</TableHead>
                       <TableHead className="text-right">작업</TableHead>
                     </TableRow>
@@ -214,6 +230,12 @@ export default function ColumnList() {
                             >
                               {column.published ? "발행됨" : "임시저장"}
                             </span>
+                          </TableCell>
+                          <TableCell className="text-slate-700 text-sm font-medium">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-3.5 h-3.5 text-slate-400" />
+                              {(column.view_count || 0).toLocaleString()}
+                            </div>
                           </TableCell>
                           <TableCell className="text-slate-500 text-sm">
                             {column.published_at
