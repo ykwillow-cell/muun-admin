@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "public": true,
   "outputDirectory": "dist/public",
   "routes": [
     { "handle": "filesystem" },
