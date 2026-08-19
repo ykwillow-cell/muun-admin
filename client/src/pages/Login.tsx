@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Loader2, AlertCircle } from "lucide-react";
+import { queryKeys } from "@/lib/queries";
 
 /**
  * Login Page - 이메일/비밀번호 로그인
@@ -11,6 +13,7 @@ import { Loader2, AlertCircle } from "lucide-react";
  */
 export default function Login() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,7 +37,8 @@ export default function Login() {
       }
 
       if (data.user) {
-        // 로그인 성공 - 대시보드로 이동
+        // 로그인 직후 캐시된 비로그인 상태를 갱신한 뒤 대시보드로 이동
+        queryClient.setQueryData(queryKeys.auth, data.user);
         setLocation("/");
       }
     } catch (err) {
