@@ -48,7 +48,7 @@ function fromCss(css: string): GradientState {
   if (!css) return defaultState;
 
   const isRadial = css.trim().startsWith("radial-gradient");
-  const inner = css.match(/gradient\((.+)\)$/s)?.[1];
+  const inner = css.match(/gradient\(([\s\S]+)\)$/)?.[1];
   if (!inner) return defaultState;
 
   let angle = 135;
@@ -119,7 +119,7 @@ function StopSlider({
   stops,
   selectedId,
   onSelect,
-  onMove,
+  onMove: onMoveStop,
   gradientCss,
 }: {
   stops: GradientStop[];
@@ -140,23 +140,23 @@ function StopSlider({
   };
 
   useEffect(() => {
-    const onMove = (e: MouseEvent | TouchEvent) => {
+    const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!dragging.current) return;
       const pos = getPos(e);
-      onMove(dragging.current, Math.round(pos));
+      onMoveStop(dragging.current, Math.round(pos));
     };
-    const onUp = () => { dragging.current = null; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onUp);
+    const handleUp = () => { dragging.current = null; };
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    window.addEventListener("touchmove", handleMove, { passive: false });
+    window.addEventListener("touchend", handleUp);
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleUp);
     };
-  }, [onMove]);
+  }, [onMoveStop]);
 
   return (
     <div

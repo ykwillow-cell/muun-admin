@@ -38,7 +38,8 @@ const columnSchema = z.object({
   published: z.boolean().default(false),
 });
 
-export type ColumnFormData = z.infer<typeof columnSchema>;
+type ColumnFormInput = z.input<typeof columnSchema>;
+export type ColumnFormData = z.output<typeof columnSchema>;
 
 interface ColumnFormProps {
   categories: Array<{ id: number; name: string; slug: string }>;
@@ -61,7 +62,7 @@ export function ColumnForm({
 }: ColumnFormProps) {
   const [metadataData, setMetadataData] = useState<MetadataFormData | null>(null);
 
-  const form = useForm<ColumnFormData>({
+  const form = useForm<ColumnFormInput, unknown, ColumnFormData>({
     resolver: zodResolver(columnSchema),
     defaultValues: {
       slug: defaultValues?.slug || "",
@@ -182,7 +183,17 @@ export function ColumnForm({
                   <FormItem>
                     <FormLabel>읽기 시간 (분)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="5" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="5"
+                        {...field}
+                        value={typeof field.value === "number" ? field.value : ""}
+                        onChange={(event) =>
+                          field.onChange(
+                            event.target.value === "" ? undefined : event.target.valueAsNumber
+                          )
+                        }
+                      />
                     </FormControl>
                     <FormDescription>
                       예상 읽기 시간을 분 단위로 입력하세요.

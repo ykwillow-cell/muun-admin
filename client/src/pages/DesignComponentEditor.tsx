@@ -711,7 +711,7 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
                 <div className="w-10 h-14 rounded-lg bg-gradient-to-b flex items-center justify-center text-lg" style={{ background: `linear-gradient(to bottom, ${componentTokens["tarot-result"]?.["--tarot-bg-glow-1"] || "rgba(107,95,255,0.20)"}, ${componentTokens["tarot-result"]?.["--tarot-bg-glow-2"] || "rgba(147,51,234,0.20)"})` }}>🌙</div>
                 <div>
                   <div className="text-xs font-bold" style={{ color: componentTokens["tarot-result"]?.["--tarot-accent"] || "#6B5FFF" }}>달 (The Moon)</div>
-                  <div className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["tarot-result"]?.["--tarot-body-size"] || "15px", fontSize: "10px" }}>직관과 무의식의 카드</div>
+                  <div className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["tarot-result"]?.["--tarot-body-size"] || "10px" }}>직관과 무의식의 카드</div>
                 </div>
               </div>
             </div>
@@ -742,7 +742,7 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
               borderColor: componentTokens["daily-fortune-result"]?.["--daily-result-card-border"] || "rgba(0,0,0,0.10)",
             }}
           >
-            <p className="text-xs" style={{ fontSize: componentTokens["daily-fortune-result"]?.["--daily-body-size"] || "15px", fontSize: "11px" }}>재물운이 열리는 날. 막혔던 흐름이 풀리는 시기입니다.</p>
+            <p className="text-xs" style={{ fontSize: componentTokens["daily-fortune-result"]?.["--daily-body-size"] || "11px" }}>재물운이 열리는 날. 막혔던 흐름이 풀리는 시기입니다.</p>
           </div>
         </div>
       </div>
@@ -796,7 +796,7 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
             <div className="px-2 py-1 rounded-full text-[10px] font-medium" style={{ background: componentTokens["dream-result"]?.["--dream-category-animal-bg"] || "rgba(251,146,60,0.10)", color: "#f97316" }}>동물</div>
             <div className="px-2 py-1 rounded-full text-[10px] font-medium" style={{ background: componentTokens["dream-result"]?.["--dream-category-nature-bg"] || "rgba(74,222,128,0.10)", color: "#22c55e" }}>자연</div>
           </div>
-          <p className="text-xs" style={{ fontSize: componentTokens["dream-result"]?.["--dream-body-size"] || "15px", fontSize: "11px", color: componentTokens["dream-result"]?.["--dream-accent"] || "#6B5FFF" }}>호랑이 꿈 해석 결과</p>
+          <p className="text-xs" style={{ fontSize: componentTokens["dream-result"]?.["--dream-body-size"] || "11px", color: componentTokens["dream-result"]?.["--dream-accent"] || "#6B5FFF" }}>호랑이 꿈 해석 결과</p>
           <p className="text-[10px] text-muted-foreground mt-1">강한 에너지와 리더십을 상징합니다.</p>
         </div>
       </div>
@@ -830,7 +830,7 @@ function PreviewPanel({ componentTokens, isVisible }: PreviewPanelProps) {
             }}
           >
             <div className="text-xs font-bold mb-1" style={{ color: componentTokens["misc-result"]?.["--psychology-accent"] || "#6B5FFF" }}>심리테스트 결과</div>
-            <p className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["misc-result"]?.["--misc-body-size"] || "15px", fontSize: "10px" }}>당신은 직관형 리더입니다.</p>
+            <p className="text-[10px] text-muted-foreground" style={{ fontSize: componentTokens["misc-result"]?.["--misc-body-size"] || "10px" }}>당신은 직관형 리더입니다.</p>
           </div>
         </div>
       </div>

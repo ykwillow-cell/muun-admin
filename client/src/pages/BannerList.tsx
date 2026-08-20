@@ -400,7 +400,14 @@ export default function BannerList() {
 
                     {/* 미리보기 */}
                     <div className="w-48 shrink-0">
-                      <BannerPreview data={banner} />
+                      <BannerPreview
+                        data={{
+                          ...banner,
+                          sub: banner.sub ?? undefined,
+                          tag: banner.tag ?? undefined,
+                          watermark: banner.watermark ?? undefined,
+                        }}
+                      />
                     </div>
 
                     {/* 정보 */}

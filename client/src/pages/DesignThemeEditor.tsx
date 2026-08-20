@@ -89,6 +89,7 @@ const EMPTY_FORM: DesignThemeFormData = {
   colors: { ...DEFAULT_COLORS },
   typography: { ...DEFAULT_TYPOGRAPHY },
   gradients: { ...DEFAULT_GRADIENTS },
+  component_tokens: {},
 };
 
 // 색상인지 판별 (hex, rgb, rgba 형식)
@@ -553,6 +554,7 @@ export default function DesignThemeEditor() {
         colors: { ...DEFAULT_COLORS, ...existingTheme.colors },
         typography: { ...DEFAULT_TYPOGRAPHY, ...existingTheme.typography },
         gradients: { ...DEFAULT_GRADIENTS, ...existingTheme.gradients },
+        component_tokens: { ...existingTheme.component_tokens },
       });
     }
   }, [existingTheme]);
